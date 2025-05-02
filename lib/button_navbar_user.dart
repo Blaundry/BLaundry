@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:blaundry_registlogin/myorder.dart';
-import 'package:blaundry_registlogin/profile.dart';
+import 'package:blaundry_registlogin/dashboard.dart';
 
 class BottomNavBaruser extends StatelessWidget {
   final int selectedIndex;
@@ -26,22 +26,9 @@ class BottomNavBaruser extends StatelessWidget {
         ],
       ),
       child: BottomNavigationBar(
-        currentIndex: selectedIndex,
-        onTap: (index) {
-          if (index == 1) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const MyOrderPage()),
-            );
-          } else if (index == 2) {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (context) => const ProfilePage()),
-            );
-          } else {
-            onTap(index);
-          }
-        },
+        currentIndex:
+            selectedIndex.clamp(0, 1), // Ensure index is within bounds
+        onTap: onTap,
         backgroundColor: Colors.white,
         selectedItemColor: const Color.fromARGB(255, 33, 149, 243),
         unselectedItemColor: Colors.grey[600],
@@ -63,13 +50,6 @@ class BottomNavBaruser extends StatelessWidget {
               child: Icon(Icons.shopping_basket, size: 24),
             ),
             label: "My Order",
-          ),
-          BottomNavigationBarItem(
-            icon: Padding(
-              padding: EdgeInsets.only(top: 8, bottom: 4),
-              child: Icon(Icons.person, size: 24),
-            ),
-            label: "Profile",
           ),
         ],
       ),

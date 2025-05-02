@@ -1,4 +1,3 @@
-import 'package:blaundry_registlogin/login_customer.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:blaundry_registlogin/regularwash.dart';
@@ -6,6 +5,7 @@ import 'package:blaundry_registlogin/shoewash.dart';
 import 'package:blaundry_registlogin/washiron.dart';
 import 'package:blaundry_registlogin/myorder.dart';
 import 'package:blaundry_registlogin/button_navbar_user.dart';
+import 'package:blaundry_registlogin/profile.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -16,41 +16,54 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
   int _selectedIndex = 0;
+  String username = "Khidir Julian"; // This should come from your auth state
 
   void _onNavBarTap(int index) {
     setState(() {
       _selectedIndex = index;
     });
+    if (index == 1) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const MyOrderPage()),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
-      onWillPop: () async => false, // Menonaktifkan tombol back
+      onWillPop: () async => false,
       child: Scaffold(
         appBar: AppBar(
-          automaticallyImplyLeading: false, // Menonaktifkan tombol back
-          backgroundColor: Colors.blue,
+          automaticallyImplyLeading: false,
+          backgroundColor: const Color.fromARGB(255, 33, 149, 243),
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              const Row(
-                children: [
-                  Text('Home',
-                      style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold)),
-                  SizedBox(width: 20),
-                ],
-              ),
+              const Text('Home',
+                  style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold)),
               GestureDetector(
-                onTap: () => _showLogoutConfirmation(context),
-                child: const Text('Logout',
-                    style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold)),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const ProfilePage()),
+                  );
+                },
+                child: CircleAvatar(
+                  radius: 16,
+                  backgroundColor: Colors.white,
+                  child: Text(
+                    username[0], // First letter of username
+                    style: const TextStyle(
+                      color: Color.fromARGB(255, 33, 149, 243),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
               ),
             ],
           ),
@@ -60,20 +73,20 @@ class _DashboardPageState extends State<DashboardPage> {
             Container(
               width: double.infinity,
               height: double.infinity,
-              color: Colors.blue,
+              color: const Color.fromARGB(255, 33, 149, 243),
               child: Column(
                 children: [
                   const SizedBox(height: 50),
-                  const Text(
-                    'Hello, User!',
-                    style: TextStyle(
+                  Text(
+                    'Hello, $username!', // Display actual username
+                    style: const TextStyle(
                         fontSize: 30,
                         fontWeight: FontWeight.bold,
                         color: Colors.white),
                   ),
                   const SizedBox(height: 10),
                   const Text(
-                    'Have you checked today’s laundry?',
+                    "Have you checked today's laundry?",
                     style: TextStyle(fontSize: 16, color: Colors.white70),
                   ),
                   const SizedBox(height: 50),
@@ -182,36 +195,10 @@ class _DashboardPageState extends State<DashboardPage> {
           ],
         ),
         bottomNavigationBar: BottomNavBaruser(
-            selectedIndex: _selectedIndex, onTap: _onNavBarTap),
+          selectedIndex: _selectedIndex.clamp(0, 1), // Ensure index is 0 or 1
+          onTap: _onNavBarTap,
+        ),
       ),
-    );
-  }
-
-  void _showLogoutConfirmation(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text("Are you sure?"),
-          content: const Text("Do you really want to logout?"),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text("No"),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-                Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                        builder: (context) => const LoginCustomerPage()));
-              },
-              child: const Text("Yes"),
-            ),
-          ],
-        );
-      },
     );
   }
 
@@ -232,8 +219,7 @@ class _DashboardPageState extends State<DashboardPage> {
           ),
           const SizedBox(height: 8),
           Text(text,
-              style:
-                  const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
         ],
       ),
     );

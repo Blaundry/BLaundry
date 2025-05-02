@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+import 'package:blaundry_registlogin/login_customer.dart'; // Import login page
 import 'package:blaundry_registlogin/dashboard.dart';
 import 'package:blaundry_registlogin/button_navbar_user.dart';
 import 'package:blaundry_registlogin/myorder.dart';
@@ -190,6 +191,12 @@ class _ProfilePageState extends State<ProfilePage> {
         backgroundColor: _primaryColor,
         elevation: 0,
         automaticallyImplyLeading: false,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout, color: Colors.white),
+            onPressed: () => _showLogoutConfirmation(),
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
@@ -336,9 +343,39 @@ class _ProfilePageState extends State<ProfilePage> {
               MaterialPageRoute(builder: (context) => const MyOrderPage()),
             );
           }
-          // index 2 is current profile page, no action needed
         },
       ),
+    );
+  }
+
+  // Add this new method for logout confirmation
+  void _showLogoutConfirmation() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Logout Confirmation"),
+          content: const Text("Are you sure you want to logout?"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child:
+                  const Text("Cancel", style: TextStyle(color: _primaryColor)),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const LoginCustomerPage()),
+                );
+              },
+              child: const Text("Logout", style: TextStyle(color: _errorColor)),
+            ),
+          ],
+        );
+      },
     );
   }
 
