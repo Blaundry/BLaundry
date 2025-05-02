@@ -20,7 +20,7 @@ Blaundry is a Flutter-based mobile application designed to simplify the laundry 
 - **Flutter**: UI toolkit for building natively compiled mobile applications.
 - **Dart**: Programming language used with Flutter.
 - **Lottie**: For smooth JSON-based animations.
-- **Firebase (Planned)**: For authentication and data storage *(if implemented)*.
+- **Firebase (Planned)**: For authentication and data storage.
 
 ## 📷 Screenshots
 
