@@ -9,7 +9,31 @@ class LoginAdminPage extends StatefulWidget {
 }
 
 class _LoginAdminPageState extends State<LoginAdminPage> {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   bool _isPasswordHidden = true;
+
+  void _validateAndLogin() {
+    String name = _nameController.text.trim();
+    String password = _passwordController.text;
+
+    if (name.isEmpty) {
+      _showMessage('Name cannot be empty');
+    } else if (password.length < 6 || password.length > 8) {
+      _showMessage('Password must be 6-8 characters');
+    } else {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const DashboardAdminPage()),
+      );
+    }
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), duration: const Duration(seconds: 2)),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +68,7 @@ class _LoginAdminPageState extends State<LoginAdminPage> {
                   const SizedBox(height: 15),
                   const Text('Name', style: TextStyle(fontWeight: FontWeight.bold)),
                   TextField(
+                    controller: _nameController,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(15),
@@ -53,6 +78,7 @@ class _LoginAdminPageState extends State<LoginAdminPage> {
                   const SizedBox(height: 10),
                   const Text('Password', style: TextStyle(fontWeight: FontWeight.bold)),
                   TextField(
+                    controller: _passwordController,
                     obscureText: _isPasswordHidden,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(
@@ -74,13 +100,7 @@ class _LoginAdminPageState extends State<LoginAdminPage> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {
-                        // Navigasi ke DashboardAdminPage
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (context) => DashboardAdminPage()),
-                        );
-                      },
+                      onPressed: _validateAndLogin,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue,
                         padding: const EdgeInsets.symmetric(vertical: 15),

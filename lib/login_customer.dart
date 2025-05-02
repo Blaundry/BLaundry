@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'regist.dart';
-import 'dashboard.dart'; // Pastikan file dashboard.dart sudah ada
+import 'dashboard.dart';
 
 class LoginCustomerPage extends StatefulWidget {
   const LoginCustomerPage({super.key});
@@ -10,7 +10,32 @@ class LoginCustomerPage extends StatefulWidget {
 }
 
 class _LoginCustomerPageState extends State<LoginCustomerPage> {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
   bool _isPasswordHidden = true;
+
+  void _validateAndLogin() {
+    String name = _nameController.text.trim();
+    String password = _passwordController.text;
+
+    if (name.isEmpty) {
+      _showMessage('Name cannot be empty');
+    } else if (password.length < 6 || password.length > 8) {
+      _showMessage('Password must be 6-8 characters');
+    } else {
+      // Simulasi login berhasil
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const DashboardPage()),
+      );
+    }
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message), duration: const Duration(seconds: 2)),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -45,6 +70,7 @@ class _LoginCustomerPageState extends State<LoginCustomerPage> {
                   const SizedBox(height: 15),
                   const Text('Name', style: TextStyle(fontWeight: FontWeight.bold)),
                   TextField(
+                    controller: _nameController,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(15),
@@ -54,6 +80,7 @@ class _LoginCustomerPageState extends State<LoginCustomerPage> {
                   const SizedBox(height: 10),
                   const Text('Password', style: TextStyle(fontWeight: FontWeight.bold)),
                   TextField(
+                    controller: _passwordController,
                     obscureText: _isPasswordHidden,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(
@@ -75,13 +102,7 @@ class _LoginCustomerPageState extends State<LoginCustomerPage> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {
-                        // Simulasi login berhasil
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(builder: (context) => DashboardPage()),
-                        );
-                      },
+                      onPressed: _validateAndLogin,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue,
                         padding: const EdgeInsets.symmetric(vertical: 15),
@@ -100,7 +121,9 @@ class _LoginCustomerPageState extends State<LoginCustomerPage> {
                       GestureDetector(
                         onTap: () {
                           Navigator.push(
-                              context, MaterialPageRoute(builder: (context) => RegistPage()));
+                            context,
+                            MaterialPageRoute(builder: (context) => const RegistPage()),
+                          );
                         },
                         child: const Text(
                           'Register',

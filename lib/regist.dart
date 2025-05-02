@@ -9,26 +9,44 @@ class RegistPage extends StatefulWidget {
 }
 
 class _RegistPageState extends State<RegistPage> {
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController = TextEditingController();
+
   bool _isPasswordVisible = false;
   bool _isConfirmPasswordVisible = false;
 
-  void _showSuccessMessage(BuildContext context) {
+  void _showMessage(String message, {Color color = Colors.red}) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Registration Success!', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.green,
-        duration: Duration(seconds: 2),
+      SnackBar(
+        content: Text(message, style: const TextStyle(color: Colors.white)),
+        backgroundColor: color,
+        duration: const Duration(seconds: 2),
       ),
     );
+  }
 
-    // Menunggu snackbar tampil selama 2 detik sebelum berpindah halaman
-    Future.delayed(const Duration(seconds: 2), () {
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (context) => WelcomePage()),
-        (route) => false,
-      );
-    });
+  void _register() {
+    String name = _nameController.text.trim();
+    String password = _passwordController.text;
+    String confirmPassword = _confirmPasswordController.text;
+
+    if (name.isEmpty) {
+      _showMessage('Name cannot be empty');
+    } else if (password.length < 6 || password.length > 8) {
+      _showMessage('Password must be 6-8 characters');
+    } else if (password != confirmPassword) {
+      _showMessage('Passwords do not match');
+    } else {
+      _showMessage('Registration Success!', color: Colors.green);
+      Future.delayed(const Duration(seconds: 2), () {
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(builder: (context) => const WelcomePage()),
+          (route) => false,
+        );
+      });
+    }
   }
 
   @override
@@ -64,6 +82,7 @@ class _RegistPageState extends State<RegistPage> {
 
                   const Text('Name', style: TextStyle(fontWeight: FontWeight.bold)),
                   TextField(
+                    controller: _nameController,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
                     ),
@@ -72,6 +91,7 @@ class _RegistPageState extends State<RegistPage> {
 
                   const Text('Password', style: TextStyle(fontWeight: FontWeight.bold)),
                   TextField(
+                    controller: _passwordController,
                     obscureText: !_isPasswordVisible,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
@@ -89,6 +109,7 @@ class _RegistPageState extends State<RegistPage> {
 
                   const Text('Confirm Password', style: TextStyle(fontWeight: FontWeight.bold)),
                   TextField(
+                    controller: _confirmPasswordController,
                     obscureText: !_isConfirmPasswordVisible,
                     decoration: InputDecoration(
                       border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
@@ -107,9 +128,7 @@ class _RegistPageState extends State<RegistPage> {
                   SizedBox(
                     width: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {
-                        _showSuccessMessage(context);
-                      },
+                      onPressed: _register,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.blue,
                         padding: const EdgeInsets.symmetric(vertical: 15),

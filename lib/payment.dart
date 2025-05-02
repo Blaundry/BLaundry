@@ -16,7 +16,6 @@ class _PaymentPageState extends State<PaymentPage> {
 
   // Design constants
   static const _primaryColor = Color(0xFF4361EE);
-  static const _secondaryColor = Color(0xFF3F37C9);
   static const _successColor = Color(0xFF2A9D8F);
 
   @override
