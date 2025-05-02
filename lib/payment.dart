@@ -10,97 +10,255 @@ class PaymentPage extends StatefulWidget {
 }
 
 class _PaymentPageState extends State<PaymentPage> {
-  String selectedMethod = 'transfer';
-  String? qrToken;
+  String _selectedMethod = 'transfer';
+  String? _qrToken;
+  final Uuid _uuid = const Uuid();
 
-  void generateQRToken() {
-    var uuid = const Uuid();
-    setState(() {
-      qrToken = uuid.v4(); // Generate token unik
-    });
-  }
+  // Design constants
+  static const _primaryColor = Color(0xFF4361EE);
+  static const _secondaryColor = Color(0xFF3F37C9);
+  static const _successColor = Color(0xFF2A9D8F);
 
   @override
   void initState() {
     super.initState();
-    generateQRToken(); // Generate pertama kali
+    _generateQRToken();
+  }
+
+  void _generateQRToken() {
+    setState(() {
+      _qrToken = _uuid.v4(); // Generate unique token
+    });
+  }
+
+  Widget _buildPaymentMethodSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "Payment Method",
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey.shade200),
+          ),
+          child: Column(
+            children: [
+              _buildPaymentOption(
+                icon: Icons.account_balance,
+                title: "Bank Transfer",
+                value: 'transfer',
+              ),
+              const Divider(height: 1, indent: 16),
+              _buildPaymentOption(
+                icon: Icons.qr_code,
+                title: "QR Payment",
+                value: 'qr',
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPaymentOption({
+    required IconData icon,
+    required String title,
+    required String value,
+  }) {
+    return ListTile(
+      leading: Icon(icon, color: _primaryColor),
+      title: Text(title),
+      trailing: Radio<String>(
+        value: value,
+        groupValue: _selectedMethod,
+        activeColor: _primaryColor,
+        onChanged: (String? value) {
+          if (value != null) {
+            setState(() => _selectedMethod = value);
+            if (value == 'qr') _generateQRToken();
+          }
+        },
+      ),
+      onTap: () {
+        setState(() => _selectedMethod = value);
+        if (value == 'qr') _generateQRToken();
+      },
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+    );
+  }
+
+  Widget _buildTransferDetails() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "Bank Transfer Details",
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.grey.shade50,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            children: [
+              _buildBankDetailRow("Bank Name", "BCA"),
+              const Divider(height: 24),
+              _buildBankDetailRow("Account Number", "1234 5678 9012"),
+              const Divider(height: 24),
+              _buildBankDetailRow("Account Holder", "PT Laundry Bersih"),
+              const Divider(height: 24),
+              _buildBankDetailRow("Amount", "Rp 85.000"),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBankDetailRow(String label, String value) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            color: Colors.grey.shade600,
+            fontSize: 14,
+          ),
+        ),
+        Text(
+          value,
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            fontSize: 14,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildQRPayment() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          "QR Payment",
+          style: TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Center(
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey.shade300),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: _qrToken != null
+                    ? QrImageView(
+                        data: _qrToken!,
+                        version: QrVersions.auto,
+                        size: 200,
+                        backgroundColor: Colors.white,
+                      )
+                    : const CircularProgressIndicator(),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                "Scan this QR code to pay",
+                style: TextStyle(
+                  color: Colors.grey.shade600,
+                  fontSize: 14,
+                ),
+              ),
+              const SizedBox(height: 8),
+              if (_qrToken != null)
+                Text(
+                  "Token: $_qrToken",
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+            ],
+          ),
+        ),
+      ],
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Payment Page'),
+        title: const Text(
+          "Payment",
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        centerTitle: true,
+        elevation: 0,
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text("Choose Payment Method:",
-                style: TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 10),
-
-            Row(
-              children: [
-                Expanded(
-                  child: RadioListTile<String>(
-                    title: const Text("Transfer"),
-                    value: 'transfer',
-                    groupValue: selectedMethod,
-                    onChanged: (value) {
-                      setState(() {
-                        selectedMethod = value!;
-                      });
-                    },
+            _buildPaymentMethodSelector(),
+            const SizedBox(height: 24),
+            _selectedMethod == 'transfer'
+                ? _buildTransferDetails()
+                : _buildQRPayment(),
+            const SizedBox(height: 32),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () {
+                  // Handle payment confirmation
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text("Payment method selected"),
+                      backgroundColor: _successColor,
+                    ),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _primaryColor,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
                   ),
                 ),
-                Expanded(
-                  child: RadioListTile<String>(
-                    title: const Text("QR Code"),
-                    value: 'qr',
-                    groupValue: selectedMethod,
-                    onChanged: (value) {
-                      setState(() {
-                        selectedMethod = value!;
-                        generateQRToken(); // Regenerate token saat pilih QR
-                      });
-                    },
-                  ),
+                child: const Text(
+                  "Confirm Payment",
+                  style: TextStyle(fontSize: 16),
                 ),
-              ],
+              ),
             ),
-
-            const SizedBox(height: 20),
-            if (selectedMethod == 'transfer') ...[
-              const Text("Bank Account Info:",
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 10),
-              const Text("Bank: BCA"),
-              const Text("Account No: 1234567890"),
-              const Text("Name: PT Laundry Bersih"),
-            ] else if (selectedMethod == 'qr') ...[
-              const Text("Scan QR Code untuk membayar:",
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              const SizedBox(height: 10),
-              Center(
-                child: qrToken != null
-                    ? QrImageView(
-                        data: qrToken!,
-                        version: QrVersions.auto,
-                        size: 200.0,
-                      )
-                    : const CircularProgressIndicator(),
-              ),
-              const SizedBox(height: 10),
-              Center(
-                child: Text(
-                  "Token: $qrToken",
-                  style: const TextStyle(fontSize: 12, color: Colors.grey),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ],
           ],
         ),
       ),

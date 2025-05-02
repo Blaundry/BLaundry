@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-import 'package:blaundry_registlogin/dashboard.dart'; // Import DashboardPage
+import 'package:blaundry_registlogin/dashboard.dart';
+import 'package:blaundry_registlogin/button_navbar_user.dart';
+import 'package:blaundry_registlogin/myorder.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
 
   @override
-  _ProfilePageState createState() => _ProfilePageState();
+  State<ProfilePage> createState() => _ProfilePageState();
 }
 
 class _ProfilePageState extends State<ProfilePage> {
@@ -15,139 +17,150 @@ class _ProfilePageState extends State<ProfilePage> {
   XFile? _profileImage;
 
   String username = "Khidir Julian";
-  String password = "************";
+  String password = "••••••••••••";
   String phoneNumber = "+62 812-3456-7890";
   String address = "Jl. Telekomunikasi No.1, Bandung";
 
-  Future<void> _pickImageFromGallery() async {
-    final pickedImage = await _picker.pickImage(source: ImageSource.gallery);
+  // Colors
+  static const _primaryColor = Color.fromARGB(255, 33, 149, 243);
+  static const _backgroundColor = Color(0xFFF8F9FA);
+  static const _errorColor = Color(0xFFE63946);
+  static const _successColor = Color(0xFF2A9D8F);
+  static const _textColor = Color(0xFF333333);
+  static const _subtextColor = Color(0xFF666666);
+
+  Future<void> _pickImage(ImageSource source) async {
+    final pickedImage = await _picker.pickImage(source: source);
     if (pickedImage != null) {
-      setState(() {
-        _profileImage = pickedImage;
-      });
+      setState(() => _profileImage = pickedImage);
     }
   }
 
-  Future<void> _takePhoto() async {
-    final pickedImage = await _picker.pickImage(source: ImageSource.camera);
-    if (pickedImage != null) {
-      setState(() {
-        _profileImage = pickedImage;
-      });
-    }
-  }
-
-  void _editField(String title, String currentValue, Function(String) onSave) {
-    final TextEditingController controller =
-        TextEditingController(text: currentValue);
-
-    showDialog(
+  void _showImagePickerOptions() {
+    showModalBottomSheet(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text("Edit $title"),
-          content: TextField(
-            controller: controller,
-            decoration: InputDecoration(
-              hintText: "Enter new $title",
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text("Cancel"),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                onSave(controller.text);
-                Navigator.of(context).pop();
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.photo_library, color: _primaryColor),
+              title: const Text("Gallery"),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.gallery);
               },
-              child: const Text("Save"),
+            ),
+            ListTile(
+              leading: const Icon(Icons.camera_alt, color: _primaryColor),
+              title: const Text("Camera"),
+              onTap: () {
+                Navigator.pop(context);
+                _pickImage(ImageSource.camera);
+              },
             ),
           ],
-        );
-      },
+        ),
+      ),
     );
   }
 
-  // New method to handle password change
-  void _editPassword(String currentPassword) {
-    final oldPasswordController = TextEditingController();
-    final newPasswordController = TextEditingController();
-    final confirmPasswordController = TextEditingController();
+  void _editField(
+      String title, String currentValue, ValueChanged<String> onSave) {
+    final controller = TextEditingController(text: currentValue);
 
     showDialog(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text("Edit Password"),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Input for old password
-              TextField(
-                controller: oldPasswordController,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: "Current Password",
-                ),
-              ),
-              const SizedBox(height: 10),
-              // Input for new password
-              TextField(
-                controller: newPasswordController,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: "New Password",
-                ),
-              ),
-              const SizedBox(height: 10),
-              // Input for confirming the new password
-              TextField(
-                controller: confirmPasswordController,
-                obscureText: true,
-                decoration: const InputDecoration(
-                  labelText: "Confirm New Password",
-                ),
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: Text("Edit $title"),
+        content: TextField(
+          controller: controller,
+          decoration: InputDecoration(
+            border: const OutlineInputBorder(),
+            hintText: "Enter new $title",
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text("Cancel"),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                // Validating the password change
-                final oldPassword = oldPasswordController.text;
-                final newPassword = newPasswordController.text;
-                final confirmPassword = confirmPasswordController.text;
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel", style: TextStyle(color: _primaryColor)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              onSave(controller.text);
+              Navigator.pop(context);
+              _showSnackbar("$title updated", _successColor);
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: _primaryColor),
+            child: const Text("Save"),
+          ),
+        ],
+      ),
+    );
+  }
 
-                if (oldPassword != currentPassword) {
-                  _showSnackbar("Incorrect current password.", Colors.red);
-                } else if (newPassword.isEmpty || newPassword.length < 8) {
-                  _showSnackbar(
-                      "Password must be at least 8 characters.", Colors.red);
-                } else if (newPassword != confirmPassword) {
-                  _showSnackbar("Passwords do not match.", Colors.red);
-                } else if (newPassword == currentPassword) {
-                  _showSnackbar(
-                      "New password cannot be the same as the old password.",
-                      Colors.red);
-                } else {
-                  setState(() {
-                    password = newPassword; // Save new password
-                  });
-                  Navigator.of(context).pop();
-                  _showSnackbar("Password updated successfully.", Colors.green);
-                }
-              },
-              child: const Text("Save"),
+  void _editPassword() {
+    final oldController = TextEditingController();
+    final newController = TextEditingController();
+    final confirmController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Change Password"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: oldController,
+              obscureText: true,
+              decoration: const InputDecoration(
+                labelText: "Current Password",
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: newController,
+              obscureText: true,
+              decoration: const InputDecoration(
+                labelText: "New Password",
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: confirmController,
+              obscureText: true,
+              decoration: const InputDecoration(
+                labelText: "Confirm Password",
+                border: OutlineInputBorder(),
+              ),
             ),
           ],
-        );
-      },
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel", style: TextStyle(color: _primaryColor)),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (newController.text != confirmController.text) {
+                _showSnackbar("Passwords don't match", _errorColor);
+              } else if (newController.text.length < 8) {
+                _showSnackbar("Password too short", _errorColor);
+              } else {
+                setState(() => password = "••••••••••••");
+                Navigator.pop(context);
+                _showSnackbar("Password updated", _successColor);
+              }
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: _primaryColor),
+            child: const Text("Update"),
+          ),
+        ],
+      ),
     );
   }
 
@@ -157,208 +170,237 @@ class _ProfilePageState extends State<ProfilePage> {
         content: Text(message),
         backgroundColor: color,
         behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    const appBarColor = Colors.blue;
-
     return Scaffold(
+      backgroundColor: _backgroundColor,
       appBar: AppBar(
-        backgroundColor: appBarColor,
-        title: const Text(
-          "My Account",
-          style: TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
+        title: const Text("Profile",
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+              fontSize: 18,
+            )),
         centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () {
-            // Navigate back to DashboardPage
+        backgroundColor: _primaryColor,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+        child: Column(
+          children: [
+            // Profile Header
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  GestureDetector(
+                    onTap: _showImagePickerOptions,
+                    child: Stack(
+                      children: [
+                        CircleAvatar(
+                          radius: 40,
+                          backgroundImage: _profileImage != null
+                              ? FileImage(File(_profileImage!.path))
+                              : null,
+                          child: _profileImage == null
+                              ? const Icon(Icons.person,
+                                  size: 40, color: Colors.grey)
+                              : null,
+                        ),
+                        Positioned(
+                          bottom: 0,
+                          right: 0,
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: _primaryColor,
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.edit,
+                                size: 16, color: Colors.white),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    username,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: _textColor,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            // Profile Details
+            _buildProfileCard(
+              children: [
+                _buildProfileTile(
+                  icon: Icons.person_outline,
+                  title: "Username",
+                  value: username,
+                  onTap: () => _editField("Username", username,
+                      (val) => setState(() => username = val)),
+                ),
+                const Divider(height: 1, indent: 16, endIndent: 16),
+                _buildProfileTile(
+                  icon: Icons.lock_outline,
+                  title: "Password",
+                  value: password,
+                  onTap: _editPassword,
+                ),
+                const Divider(height: 1, indent: 16, endIndent: 16),
+                _buildProfileTile(
+                  icon: Icons.phone_android_outlined,
+                  title: "Phone",
+                  value: phoneNumber,
+                  onTap: () => _editField("Phone", phoneNumber,
+                      (val) => setState(() => phoneNumber = val)),
+                ),
+                const Divider(height: 1, indent: 16, endIndent: 16),
+                _buildProfileTile(
+                  icon: Icons.home_outlined,
+                  title: "Address",
+                  value: address,
+                  onTap: () => _editField("Address", address,
+                      (val) => setState(() => address = val)),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 24),
+
+            // Action Buttons
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => _showSnackbar("Profile saved", _successColor),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _primaryColor,
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text("Save Changes",
+                    style:
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            TextButton(
+              onPressed: () => _showDeleteConfirmation(),
+              child: const Text("Delete Account",
+                  style: TextStyle(color: _errorColor, fontSize: 14)),
+            ),
+          ],
+        ),
+      ),
+      bottomNavigationBar: BottomNavBaruser(
+        selectedIndex: 2, // Profile is selected
+        onTap: (index) {
+          if (index == 0) {
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (context) => const DashboardPage()),
             );
-          },
-        ),
-      ),
-      body: Container(
-        color: Colors.grey[100],
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              // Header with rounded bottom container for profile photo
-              Container(
-                width: double.infinity,
-                height: MediaQuery.of(context).size.height * 0.20,
-                decoration: BoxDecoration(
-                  color: appBarColor,
-                  borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(30),
-                    bottomRight: Radius.circular(30),
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    GestureDetector(
-                      onTap: () {
-                        _showImagePickerOptions(context);
-                      },
-                      child: CircleAvatar(
-                        radius: 60,
-                        backgroundColor: Colors.white,
-                        backgroundImage: _profileImage != null
-                            ? FileImage(File(_profileImage!.path))
-                            : const AssetImage('default_profile.jpg')
-                                as ImageProvider,
-                        child: _profileImage == null
-                            ? const Icon(Icons.camera_alt,
-                                size: 40, color: Colors.grey)
-                            : null,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    Text(
-                      username,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 20),
-
-              // Details
-              _buildProfileDetail("Username", username, () {
-                _editField("Username", username,
-                    (val) => setState(() => username = val));
-              }),
-              _buildProfileDetail("Password", password, () {
-                _editPassword(password); // Call the method to edit password
-              }),
-              _buildProfileDetail("Phone Number", phoneNumber, () {
-                _editField("Phone Number", phoneNumber,
-                    (val) => setState(() => phoneNumber = val));
-              }),
-              _buildProfileDetail("Address", address, () {
-                _editField(
-                    "Address", address, (val) => setState(() => address = val));
-              }),
-
-              const SizedBox(height: 20),
-
-              // Buttons
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                child: Column(
-                  children: [
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        _showSnackbar(
-                            "Changes saved successfully!", Colors.green);
-                      },
-                      icon: const Icon(Icons.save),
-                      label: const Text("Save Changes"),
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: const Size.fromHeight(50),
-                        backgroundColor: Colors.blueAccent,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        _showSnackbar("Account deleted (mock).", Colors.red);
-                      },
-                      icon: const Icon(Icons.delete_forever),
-                      label: const Text("Delete Account"),
-                      style: ElevatedButton.styleFrom(
-                        minimumSize: const Size.fromHeight(50),
-                        backgroundColor: Colors.redAccent,
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 30),
-            ],
-          ),
-        ),
+          } else if (index == 1) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const MyOrderPage()),
+            );
+          }
+          // index 2 is current profile page, no action needed
+        },
       ),
     );
   }
 
-  Widget _buildProfileDetail(String title, String value, VoidCallback onEdit) {
+  Widget _buildProfileCard({required List<Widget> children}) {
     return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-      elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      child: ListTile(
-        title: Text(
-          title,
-          style: const TextStyle(
-            fontSize: 14,
-            color: Colors.grey,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        subtitle: Text(
-          value,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-          ),
-        ),
-        trailing: const Icon(Icons.edit, color: Colors.grey),
-        onTap: onEdit,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
       ),
+      child: Column(children: children),
     );
   }
 
-  void _showImagePickerOptions(BuildContext context) {
-    showModalBottomSheet(
+  Widget _buildProfileTile({
+    required IconData icon,
+    required String title,
+    required String value,
+    required VoidCallback onTap,
+  }) {
+    return ListTile(
+      leading: Icon(icon, color: _primaryColor, size: 22),
+      title: Text(title,
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
+            color: _textColor,
+          )),
+      subtitle: Text(value,
+          style: const TextStyle(
+            fontSize: 13,
+            color: _subtextColor,
+          )),
+      trailing: const Icon(Icons.edit, size: 18, color: Colors.grey),
+      onTap: onTap,
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      minLeadingWidth: 24,
+    );
+  }
+
+  void _showDeleteConfirmation() {
+    showDialog(
       context: context,
-      builder: (context) {
-        return SafeArea(
-          child: Wrap(
-            children: [
-              ListTile(
-                leading: const Icon(Icons.photo_library),
-                title: const Text("Choose from Gallery"),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  _pickImageFromGallery();
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.camera_alt),
-                title: const Text("Take a Photo"),
-                onTap: () {
-                  Navigator.of(context).pop();
-                  _takePhoto();
-                },
-              ),
-            ],
+      builder: (context) => AlertDialog(
+        title: const Text("Delete Account?",
+            style: TextStyle(fontWeight: FontWeight.bold)),
+        content: const Text("This action cannot be undone. Are you sure?"),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel", style: TextStyle(color: _primaryColor)),
           ),
-        );
-      },
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _showSnackbar("Account deleted", _errorColor);
+            },
+            child: const Text("Delete",
+                style:
+                    TextStyle(color: _errorColor, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
     );
   }
 }
