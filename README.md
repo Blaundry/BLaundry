@@ -1,16 +1,34 @@
-# blaundry_registlogin
+# Blaundry - Mobile Laundry Service App
 
-A new Flutter project.
+Blaundry is a Flutter-based mobile application designed to simplify the laundry experience. With an intuitive interface, users can select various laundry services, input laundry item quantities, view order history, and manage their profiles with ease.
 
-## Getting Started
+## 🚀 Features
 
-This project is a starting point for a Flutter application.
+- 🔐 User Registration & Login
+- 🧺 Multiple Laundry Services:
+  - Regular Wash
+  - Shoe Wash
+  - Wash + Iron
+- 📦 Custom Quantity Input for Items (e.g., Baju, Celana, Jaket)
+- 📜 Order Tracking & History (`My Order`)
+- 👤 Profile Page with Avatar & Initials
+- 🎨 Interactive Dashboard UI with Animations
+- 📱 Responsive layout for Android devices
 
-A few resources to get you started if this is your first Flutter project:
+## 🛠 Tech Stack
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+- **Flutter**: UI toolkit for building natively compiled mobile applications.
+- **Dart**: Programming language used with Flutter.
+- **Lottie**: For smooth JSON-based animations.
+- **Firebase (Planned)**: For authentication and data storage *(if implemented)*.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 📷 Screenshots
+
+*Coming soon – UI examples of the dashboard, service selection, and order summary.*
+
+## 🔧 Getting Started
+
+1. **Clone this repository**
+   ```bash
+   git clone https://github.com/yourusername/blaundry_registlogin.git
+   cd blaundry_registlogin
