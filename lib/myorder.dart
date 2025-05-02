@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'payment.dart';
-import 'dashboard.dart';
+import 'package:blaundry_registlogin/payment.dart';
+import 'package:blaundry_registlogin/dashboard.dart';
+import 'package:blaundry_registlogin/profile.dart';
+import 'package:blaundry_registlogin/button_navbar_user.dart';
 
 class MyOrderPage extends StatelessWidget {
   const MyOrderPage({super.key});
@@ -9,28 +11,28 @@ class MyOrderPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Orders', style: TextStyle(fontWeight: FontWeight.bold)),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const DashboardPage()),
-          ),
-        ),
+        title: const Text('My Orders',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 18,
+              color: Colors.white,
+            )),
         centerTitle: true,
+        backgroundColor: const Color.fromARGB(255, 33, 149, 243),
         elevation: 0,
+        automaticallyImplyLeading: false,
       ),
       body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 16),
-            Text('Active Orders', 
+            Text('Active Orders',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey[700],
-                )),
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[700],
+                      fontSize: 16,
+                    )),
             const SizedBox(height: 12),
             _buildOrderCard(
               context,
@@ -39,16 +41,17 @@ class MyOrderPage extends StatelessWidget {
               status: 'In Process',
               statusColor: Colors.orange,
               onTap: () => Navigator.push(
-                context, 
+                context,
                 MaterialPageRoute(builder: (context) => const PaymentPage()),
               ),
             ),
             const SizedBox(height: 24),
-            Text('Order History', 
+            Text('Order History',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.grey[700],
-                )),
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey[700],
+                      fontSize: 16,
+                    )),
             const SizedBox(height: 12),
             _buildOrderCard(
               context,
@@ -59,6 +62,22 @@ class MyOrderPage extends StatelessWidget {
             ),
           ],
         ),
+      ),
+      bottomNavigationBar: BottomNavBaruser(
+        selectedIndex: 1, // My Order is selected
+        onTap: (index) {
+          if (index == 0) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const DashboardPage()),
+            );
+          } else if (index == 2) {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const ProfilePage()),
+            );
+          }
+        },
       ),
     );
   }
@@ -77,6 +96,7 @@ class MyOrderPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(color: Colors.grey.shade200, width: 1),
       ),
+      margin: const EdgeInsets.only(bottom: 16),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: onTap,
@@ -90,21 +110,26 @@ class MyOrderPage extends StatelessWidget {
                   color: Colors.blue.shade50,
                   shape: BoxShape.circle,
                 ),
-                child: const Icon(Icons.local_laundry_service, color: Colors.blue),
+                child: const Icon(Icons.local_laundry_service,
+                    size: 24, color: Color.fromARGB(255, 33, 149, 243)),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(service, 
+                    Text(service,
                         style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 15,
+                          color: Color(0xFF333333),
                         )),
                     const SizedBox(height: 4),
                     Text('$items ${items > 1 ? 'items' : 'item'}',
-                        style: TextStyle(color: Colors.grey.shade600)),
+                        style: TextStyle(
+                          fontSize: 13,
+                          color: Colors.grey.shade600,
+                        )),
                   ],
                 ),
               ),
@@ -112,7 +137,8 @@ class MyOrderPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                     decoration: BoxDecoration(
                       color: statusColor.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
@@ -120,13 +146,15 @@ class MyOrderPage extends StatelessWidget {
                     child: Text(status,
                         style: TextStyle(
                           color: statusColor,
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w600,
                           fontSize: 12,
                         )),
                   ),
-                  const SizedBox(height: 8),
-                  if (onTap != null)
-                    const Icon(Icons.chevron_right, color: Colors.grey),
+                  if (onTap != null) ...[
+                    const SizedBox(height: 8),
+                    const Icon(Icons.chevron_right,
+                        size: 20, color: Colors.grey),
+                  ],
                 ],
               ),
             ],
