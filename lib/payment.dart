@@ -15,7 +15,7 @@ class _PaymentPageState extends State<PaymentPage> {
   final Uuid _uuid = const Uuid();
 
   // Design constants
-  static const _primaryColor = Color(0xFF4361EE);
+  static const _primaryColor = Color(0xFF05588A);
   static const _successColor = Color(0xFF2A9D8F);
 
   @override
@@ -254,7 +254,7 @@ class _PaymentPageState extends State<PaymentPage> {
                 ),
                 child: const Text(
                   "Confirm Payment",
-                  style: TextStyle(fontSize: 16),
+                  style: TextStyle(fontSize: 16,color: Colors.white),
                 ),
               ),
             ),

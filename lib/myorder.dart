@@ -18,7 +18,7 @@ class MyOrderPage extends StatelessWidget {
               color: Colors.white,
             )),
         centerTitle: true,
-        backgroundColor: const Color.fromARGB(255, 33, 149, 243),
+        backgroundColor: Color(0xFF05588A),
         elevation: 0,
         automaticallyImplyLeading: false,
       ),

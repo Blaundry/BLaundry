@@ -23,7 +23,7 @@ class _ProfilePageState extends State<ProfilePage> {
   String address = "Jl. Telekomunikasi No.1, Bandung";
 
   // Colors
-  static const _primaryColor = Color.fromARGB(255, 33, 149, 243);
+  static const _primaryColor = Color(0xFF05588A);
   static const _backgroundColor = Color(0xFFF8F9FA);
   static const _errorColor = Color(0xFFE63946);
   static const _successColor = Color(0xFF2A9D8F);
@@ -315,7 +315,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 child: const Text("Save Changes",
                     style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.w600)),
+                        TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Colors.white)),
               ),
             ),
 
