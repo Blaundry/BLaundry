@@ -15,12 +15,46 @@ class _WashIronPageState extends State<WashIronPage> {
 
   final int _pricePerKg = 8000;
   int _totalCost = 0;
+  bool _isLoading = false;
+  final _formKey = GlobalKey<FormState>();
+
+  final Color primaryColor = const Color(0xFF05588A);
+  final Color backgroundColor = const Color(0xFFF5F9FF);
 
   void _calculateCost(String qtyText) {
     final qty = int.tryParse(qtyText) ?? 0;
     setState(() {
       _totalCost = qty * _pricePerKg;
     });
+  }
+
+  Future<void> _saveData() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => _isLoading = true);
+    await Future.delayed(const Duration(seconds: 1));
+    setState(() => _isLoading = false);
+
+    if (!mounted) return;
+
+    _formKey.currentState!.reset();
+    setState(() => _totalCost = 0);
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: const Text('Order saved successfully'),
+        backgroundColor: primaryColor,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        action: SnackBarAction(
+          label: 'OK',
+          textColor: Colors.white,
+          onPressed: () {},
+        ),
+      ),
+    );
   }
 
   @override
@@ -34,61 +68,167 @@ class _WashIronPageState extends State<WashIronPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: backgroundColor,
       appBar: AppBar(
         title: const Text('Wash + Iron'),
+        centerTitle: true,
+        backgroundColor: primaryColor,
+        foregroundColor: Colors.white,
       ),
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: ListView(
-          children: [
-            const Text('Item:', style: TextStyle(fontWeight: FontWeight.bold)),
-            TextField(
-              controller: _itemController,
-              decoration: const InputDecoration(
-                hintText: 'Enter item',
-                helperText: 'Contoh: Baju, Celana, Jas',
+        padding: const EdgeInsets.all(20.0),
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            physics: const BouncingScrollPhysics(),
+            children: [
+              Text(
+                'New Wash + Iron Order',
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: primaryColor,
+                    ),
               ),
-            ),
-
-            const SizedBox(height: 20),
-            const Text('Material:', style: TextStyle(fontWeight: FontWeight.bold)),
-            TextField(
-              controller: _materialController,
-              decoration: const InputDecoration(
-                hintText: 'Enter material',
+              const SizedBox(height: 8),
+              Text(
+                'Fill in the details for the laundry order',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Colors.grey.shade600,
+                    ),
               ),
-            ),
+              const SizedBox(height: 24),
 
-            const SizedBox(height: 20),
-            const Text('Quantity (kg):', style: TextStyle(fontWeight: FontWeight.bold)),
-            TextField(
-              controller: _quantityController,
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              decoration: const InputDecoration(
-                hintText: 'Enter quantity',
+              TextFormField(
+                controller: _itemController,
+                decoration: InputDecoration(
+                  labelText: 'Item Name',
+                  hintText: 'e.g., Baju, Celana, Jas',
+                  prefixIcon: Icon(Icons.checkroom, color: primaryColor),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
+                validator: (value) =>
+                    value == null || value.isEmpty ? 'Item is required' : null,
               ),
-              onChanged: _calculateCost,
-            ),
+              const SizedBox(height: 16),
 
-            const SizedBox(height: 20),
-            Text(
-              'Total Cost: Rp$_totalCost',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
+              TextFormField(
+                controller: _materialController,
+                decoration: InputDecoration(
+                  labelText: 'Material',
+                  hintText: 'e.g., Katun, Linen',
+                  prefixIcon: Icon(Icons.texture, color: primaryColor),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
+                validator: (value) =>
+                    value == null || value.isEmpty ? 'Material is required' : null,
+              ),
+              const SizedBox(height: 16),
 
-            const SizedBox(height: 40),
-            Center(
-              child: ElevatedButton(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Saved')),
-                  );
+              TextFormField(
+                controller: _quantityController,
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                decoration: InputDecoration(
+                  labelText: 'Quantity (kg)',
+                  hintText: 'Enter total weight in kg',
+                  prefixIcon: Icon(Icons.scale, color: primaryColor),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  filled: true,
+                  fillColor: Colors.white,
+                ),
+                onChanged: _calculateCost,
+                validator: (value) {
+                  final qty = int.tryParse(value ?? '') ?? 0;
+                  if (qty <= 0) return 'Must be greater than 0 kg';
+                  if (qty > 50) return 'Max 50 kg per order';
+                  return null;
                 },
-                child: const Text('Save'),
               ),
-            ),
-          ],
+              const SizedBox(height: 24),
+
+              Card(
+                elevation: 2,
+                color: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(color: primaryColor.withOpacity(0.2)),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'PRICE DETAILS',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: primaryColor,
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                      const SizedBox(height: 12),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Text('Total Cost',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyLarge
+                                  ?.copyWith(color: Colors.grey.shade700)),
+                          Text(
+                            'Rp$_totalCost',
+                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                                  fontWeight: FontWeight.bold,
+                                  color: primaryColor,
+                                ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Price: Rp$_pricePerKg / kg',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                              color: Colors.grey.shade600,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 32),
+
+              SizedBox(
+                height: 50,
+                child: ElevatedButton(
+                  onPressed: _isLoading ? null : _saveData,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: primaryColor,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: _isLoading
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text(
+                          'SAVE ORDER',
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
