@@ -66,7 +66,8 @@ flutter:
     - assets/logosimple3.png
     - assets/logosimple4.png
     - assets/wave.json
-    - assets/default_profile.jpg
+    - assets/Default_profile.jpg
+    - assets/laundry_bg.jpg
 
   #   - images/a_dot_ham.jpeg
 
