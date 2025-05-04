@@ -1,10 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'startpage.dart';
+import 'firebase_options.dart'; 
 
-
-
-void main() {
-  runApp(MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,  // Use the correct options
+  );
+  runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -15,10 +19,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
-        fontFamily: 'Poppins', // Gunakan font secara global
+        fontFamily: 'Poppins',
       ),
-      home: StartPage(), // Halaman pertama adalah StartPage
+      home: const StartPage(), // Halaman pertama
     );
   }
 }
-

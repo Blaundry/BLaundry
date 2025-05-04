@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:blaundry_registlogin/payment.dart';
 import 'package:blaundry_registlogin/dashboard.dart';
@@ -9,6 +11,15 @@ class MyOrderPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final userId = FirebaseAuth
+        .instance.currentUser?.uid;
+
+    print("User ID: $userId");
+
+    if (userId == null) {
+      return const Center(child: Text("User is not logged in"));
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('My Orders',
@@ -18,7 +29,7 @@ class MyOrderPage extends StatelessWidget {
               color: Colors.white,
             )),
         centerTitle: true,
-        backgroundColor: Color(0xFF05588A),
+        backgroundColor: const Color(0xFF05588A),
         elevation: 0,
         automaticallyImplyLeading: false,
       ),
@@ -34,18 +45,54 @@ class MyOrderPage extends StatelessWidget {
                       fontSize: 16,
                     )),
             const SizedBox(height: 12),
-            _buildOrderCard(
-              context,
-              service: 'Regular Wash',
-              items: 3,
-              status: 'In Process',
-              statusColor: Colors.orange,
-              onTap: () => Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const PaymentPage()),
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('orders')
+                    .where('userId',
+                        isEqualTo: userId)
+                    .where('status', isNotEqualTo: 'Finished')
+                    .orderBy('createdAt', descending: true)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    print("Error loading orders: ${snapshot.error}");
+                    return const Center(child: Text('Error loading orders'));
+                  }
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  final activeOrders = snapshot.data!.docs;
+
+                  if (activeOrders.isEmpty) {
+                    return const Center(child: Text('No active orders'));
+                  }
+
+                  return ListView.builder(
+                    itemCount: activeOrders.length,
+                    itemBuilder: (context, index) {
+                      final data =
+                          activeOrders[index].data() as Map<String, dynamic>;
+
+                      return _buildOrderCard(
+                        context,
+                        service: data['serviceType'] ?? 'Laundry',
+                        items: data['quantity'] ?? 0,
+                        status: data['status'] ?? 'Unknown',
+                        statusColor: Colors.orange,
+                        onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const PaymentPage()),
+                        ),
+                      );
+                    },
+                  );
+                },
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 12),
             Text('Order History',
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w600,
@@ -53,18 +100,53 @@ class MyOrderPage extends StatelessWidget {
                       fontSize: 16,
                     )),
             const SizedBox(height: 12),
-            _buildOrderCard(
-              context,
-              service: 'Shoe Wash',
-              items: 1,
-              status: 'Completed',
-              statusColor: Colors.green,
+            Expanded(
+              child: StreamBuilder<QuerySnapshot>(
+                stream: FirebaseFirestore.instance
+                    .collection('orders')
+                    .where('userId',
+                        isEqualTo: userId) // Filter berdasarkan userId
+                    .where('status', isEqualTo: 'Finished')
+                    .orderBy('createdAt', descending: true)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    print("Error loading orders: ${snapshot.error}");
+                    return const Center(child: Text('Error loading history'));
+                  }
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  final historyOrders = snapshot.data!.docs;
+
+                  if (historyOrders.isEmpty) {
+                    return const Center(child: Text('No completed orders yet'));
+                  }
+
+                  return ListView.builder(
+                    itemCount: historyOrders.length,
+                    itemBuilder: (context, index) {
+                      final data =
+                          historyOrders[index].data() as Map<String, dynamic>;
+
+                      return _buildOrderCard(
+                        context,
+                        service: data['serviceType'] ?? 'Laundry',
+                        items: data['quantity'] ?? 0,
+                        status: data['status'] ?? 'Completed',
+                        statusColor: Colors.green,
+                      );
+                    },
+                  );
+                },
+              ),
             ),
           ],
         ),
       ),
       bottomNavigationBar: BottomNavBaruser(
-        selectedIndex: 1, // My Order is selected
+        selectedIndex: 1,
         onTap: (index) {
           if (index == 0) {
             Navigator.pushReplacement(
@@ -87,9 +169,40 @@ class MyOrderPage extends StatelessWidget {
     required String service,
     required int items,
     required String status,
-    required Color statusColor,
-    VoidCallback? onTap,
+    VoidCallback? onTap, required MaterialColor statusColor,
   }) {
+    // Tentukan warna dan ikon berdasarkan status
+    Color statusColor;
+    IconData statusIcon;
+    String statusLabel;
+
+    switch (status) {
+      case 'Pending to Process':
+        statusColor = Colors.orange;
+        statusIcon = Icons.schedule;
+        statusLabel = 'Pending';
+        break;
+      case 'Processed':
+        statusColor = Colors.blue;
+        statusIcon = Icons.autorenew;
+        statusLabel = 'In Process';
+        break;
+      case 'Finished':
+        statusColor = Colors.purple;
+        statusIcon = Icons.check_circle_outline;
+        statusLabel = 'Finished';
+        break;
+      case 'Completed':
+        statusColor = Colors.green;
+        statusIcon = Icons.check_circle;
+        statusLabel = 'Completed';
+        break;
+      default:
+        statusColor = Colors.grey;
+        statusIcon = Icons.help_outline;
+        statusLabel = 'Unknown';
+    }
+
     return Card(
       elevation: 0,
       shape: RoundedRectangleBorder(
@@ -138,17 +251,23 @@ class MyOrderPage extends StatelessWidget {
                 children: [
                   Container(
                     padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
                       color: statusColor.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Text(status,
-                        style: TextStyle(
-                          color: statusColor,
-                          fontWeight: FontWeight.w600,
-                          fontSize: 12,
-                        )),
+                    child: Row(
+                      children: [
+                        Icon(statusIcon, size: 14, color: statusColor),
+                        const SizedBox(width: 4),
+                        Text(statusLabel,
+                            style: TextStyle(
+                              color: statusColor,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 12,
+                            )),
+                      ],
+                    ),
                   ),
                   if (onTap != null) ...[
                     const SizedBox(height: 8),

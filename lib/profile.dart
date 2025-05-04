@@ -237,7 +237,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           right: 0,
                           child: Container(
                             padding: const EdgeInsets.all(6),
-                            decoration: BoxDecoration(
+                            decoration: const BoxDecoration(
                               color: _primaryColor,
                               shape: BoxShape.circle,
                             ),

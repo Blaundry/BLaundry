@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:blaundry_registlogin/dashboard_Admin.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class LoginAdminPage extends StatefulWidget {
   const LoginAdminPage({super.key});
@@ -13,19 +15,46 @@ class _LoginAdminPageState extends State<LoginAdminPage> {
   final TextEditingController _passwordController = TextEditingController();
   bool _isPasswordHidden = true;
 
-  void _validateAndLogin() {
-    String name = _nameController.text.trim();
+  void _validateAndLogin() async {
+    String email = _nameController.text.trim();
     String password = _passwordController.text;
 
-    if (name.isEmpty) {
+    if (email.isEmpty) {
       _showMessage('Name cannot be empty');
     } else if (password.length < 6 || password.length > 8) {
       _showMessage('Password must be 6-8 characters');
     } else {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const DashboardAdminPage()),
-      );
+      try {
+
+        // Login ke Firebase Auth
+        UserCredential userCredential = await FirebaseAuth.instance
+            .signInWithEmailAndPassword(email: email, password: password);
+
+        // Ambil UID
+        String uid = userCredential.user!.uid;
+
+        // Ambil dokumen user dari Firestore
+        DocumentSnapshot userDoc =
+            await FirebaseFirestore.instance.collection('users').doc(uid).get();
+
+        // Cek apakah dokumen user ada
+        if (userDoc.exists) {
+          String role = userDoc['role'];
+          if (role == 'admin') {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                  builder: (context) => const DashboardAdminPage()),
+            );
+          } else {
+            _showMessage('You are not an admin');
+          }
+        } else {
+          _showMessage('User data not found');
+        }
+      } on FirebaseAuthException catch (e) {
+        _showMessage(e.message ?? 'Login failed');
+      }
     }
   }
 
@@ -55,7 +84,9 @@ class _LoginAdminPageState extends State<LoginAdminPage> {
               child: const Text(
                 'B-Laundry',
                 style: TextStyle(
-                    fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
               ),
             ),
             Padding(
@@ -63,10 +94,14 @@ class _LoginAdminPageState extends State<LoginAdminPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Login Admin', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                  const Text('Please input name and password', style: TextStyle(color: Colors.grey)),
+                  const Text('Login Admin',
+                      style:
+                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                  const Text('Please input email and password',
+                      style: TextStyle(color: Colors.grey)),
                   const SizedBox(height: 15),
-                  const Text('Name', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const Text('Email',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
                   TextField(
                     controller: _nameController,
                     decoration: InputDecoration(
@@ -76,7 +111,8 @@ class _LoginAdminPageState extends State<LoginAdminPage> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  const Text('Password', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const Text('Password',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
                   TextField(
                     controller: _passwordController,
                     obscureText: _isPasswordHidden,
@@ -86,7 +122,9 @@ class _LoginAdminPageState extends State<LoginAdminPage> {
                       ),
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _isPasswordHidden ? Icons.visibility_off : Icons.visibility,
+                          _isPasswordHidden
+                              ? Icons.visibility_off
+                              : Icons.visibility,
                         ),
                         onPressed: () {
                           setState(() {

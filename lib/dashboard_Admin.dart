@@ -205,7 +205,7 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
                 Navigator.of(context).pop();
                 Navigator.pushReplacement(
                   context,
-                  MaterialPageRoute(builder: (context) => LoginCustomerPage()),
+                  MaterialPageRoute(builder: (context) => const LoginCustomerPage()),
                 );
               },
               child: const Text("Yes"),

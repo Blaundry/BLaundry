@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "867582911189",
+    "project_id": "blaundry-d26d1",
+    "storage_bucket": "blaundry-d26d1.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:867582911189:android:f53b4725e1eb14e421785c",
+        "android_client_info": {
+          "package_name": "com.example.blaundry_registlogin"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCfep6uK_KzqC_m0BMWIFwxTPg4TnVgj3k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

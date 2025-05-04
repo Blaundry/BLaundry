@@ -63,7 +63,7 @@ class WelcomePage extends StatelessWidget {
                         onPressed: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => LoginCustomerPage()),
+                            MaterialPageRoute(builder: (context) => const LoginCustomerPage()),
                           );
                         },
                         style: ElevatedButton.styleFrom(
@@ -83,7 +83,7 @@ class WelcomePage extends StatelessWidget {
                         const Text("Are you an admin? "),
                         GestureDetector(
                           onTap: () {
-                            Navigator.push(context, MaterialPageRoute(builder: (context) => LoginAdminPage()));
+                            Navigator.push(context, MaterialPageRoute(builder: (context) => const LoginAdminPage()));
                           },
                           child: const Text(
                             'login',

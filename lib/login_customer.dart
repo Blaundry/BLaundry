@@ -1,6 +1,9 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'regist.dart';
 import 'dashboard.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 
 class LoginCustomerPage extends StatefulWidget {
   const LoginCustomerPage({super.key});
@@ -14,20 +17,43 @@ class _LoginCustomerPageState extends State<LoginCustomerPage> {
   final TextEditingController _passwordController = TextEditingController();
   bool _isPasswordHidden = true;
 
-  void _validateAndLogin() {
-    String name = _nameController.text.trim();
+  void _validateAndLogin() async {
+    String email = _nameController.text.trim();
     String password = _passwordController.text;
 
-    if (name.isEmpty) {
-      _showMessage('Name cannot be empty');
+    if (email.isEmpty) {
+      _showMessage('Email cannot be empty');
     } else if (password.length < 6 || password.length > 8) {
       _showMessage('Password must be 6-8 characters');
     } else {
-      // Simulasi login berhasil
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const DashboardPage()),
-      );
+      try {
+        final credential = await FirebaseAuth.instance
+            .signInWithEmailAndPassword(email: email, password: password);
+
+        // Ambil UID user
+        String uid = credential.user!.uid;
+
+        // Ambil data user dari Firestore
+        DocumentSnapshot userDoc =
+            await FirebaseFirestore.instance.collection('users').doc(uid).get();
+
+        if (userDoc.exists) {
+          String role = userDoc['role'];
+
+          if (role == 'user') {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const DashboardPage()),
+            );
+          } else {
+            _showMessage('Access denied. Only users can login here.');
+          }
+        } else {
+          _showMessage('User data not found');
+        }
+      } on FirebaseAuthException catch (e) {
+        _showMessage(e.message ?? 'Login failed');
+      }
     }
   }
 
@@ -57,7 +83,9 @@ class _LoginCustomerPageState extends State<LoginCustomerPage> {
               child: const Text(
                 'B-Laundry',
                 style: TextStyle(
-                    fontSize: 32, fontWeight: FontWeight.bold, color: Colors.white),
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
               ),
             ),
             Padding(
@@ -65,10 +93,14 @@ class _LoginCustomerPageState extends State<LoginCustomerPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Login', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-                  const Text('Please input name and password', style: TextStyle(color: Colors.grey)),
+                  const Text('Login',
+                      style:
+                          TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                  const Text('Please input email and password',
+                      style: TextStyle(color: Colors.grey)),
                   const SizedBox(height: 15),
-                  const Text('Name', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const Text('Email',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
                   TextField(
                     controller: _nameController,
                     decoration: InputDecoration(
@@ -78,7 +110,8 @@ class _LoginCustomerPageState extends State<LoginCustomerPage> {
                     ),
                   ),
                   const SizedBox(height: 10),
-                  const Text('Password', style: TextStyle(fontWeight: FontWeight.bold)),
+                  const Text('Password',
+                      style: TextStyle(fontWeight: FontWeight.bold)),
                   TextField(
                     controller: _passwordController,
                     obscureText: _isPasswordHidden,
@@ -88,7 +121,9 @@ class _LoginCustomerPageState extends State<LoginCustomerPage> {
                       ),
                       suffixIcon: IconButton(
                         icon: Icon(
-                          _isPasswordHidden ? Icons.visibility_off : Icons.visibility,
+                          _isPasswordHidden
+                              ? Icons.visibility_off
+                              : Icons.visibility,
                         ),
                         onPressed: () {
                           setState(() {
@@ -122,12 +157,14 @@ class _LoginCustomerPageState extends State<LoginCustomerPage> {
                         onTap: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => const RegistPage()),
+                            MaterialPageRoute(
+                                builder: (context) => const RegistPage()),
                           );
                         },
                         child: const Text(
                           'Register',
-                          style: TextStyle(color: Colors.blue, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              color: Colors.blue, fontWeight: FontWeight.bold),
                         ),
                       ),
                     ],

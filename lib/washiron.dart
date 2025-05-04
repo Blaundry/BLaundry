@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+final userId = FirebaseAuth.instance.currentUser?.uid;
 
 class WashIronPage extends StatefulWidget {
   const WashIronPage({super.key});
@@ -32,29 +36,36 @@ class _WashIronPageState extends State<WashIronPage> {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
-    await Future.delayed(const Duration(seconds: 1));
-    setState(() => _isLoading = false);
+    try {
+      await FirebaseFirestore.instance.collection('orders').add({
+        'serviceType': 'wash_iron',
+        'item': _itemController.text.trim(),
+        'material': _materialController.text.trim(),
+        'quantity': int.parse(_quantityController.text.trim()),
+        'totalCost': _totalCost,
+        'createdAt': Timestamp.now(),
+        'status': 'In Process',
+        'userId': userId,
+      });
 
-    if (!mounted) return;
+      _formKey.currentState!.reset();
+      setState(() {
+        _totalCost = 0;
+        _isLoading = false;
+      });
 
-    _formKey.currentState!.reset();
-    setState(() => _totalCost = 0);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Order saved successfully'),
-        backgroundColor: primaryColor,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Wash + Iron order saved successfully'),
+          backgroundColor: primaryColor,
         ),
-        action: SnackBarAction(
-          label: 'OK',
-          textColor: Colors.white,
-          onPressed: () {},
-        ),
-      ),
-    );
+      );
+    } catch (e) {
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to save order: $e')),
+      );
+    }
   }
 
   @override
@@ -97,7 +108,6 @@ class _WashIronPageState extends State<WashIronPage> {
                     ),
               ),
               const SizedBox(height: 24),
-
               TextFormField(
                 controller: _itemController,
                 decoration: InputDecoration(
@@ -114,7 +124,6 @@ class _WashIronPageState extends State<WashIronPage> {
                     value == null || value.isEmpty ? 'Item is required' : null,
               ),
               const SizedBox(height: 16),
-
               TextFormField(
                 controller: _materialController,
                 decoration: InputDecoration(
@@ -127,11 +136,11 @@ class _WashIronPageState extends State<WashIronPage> {
                   filled: true,
                   fillColor: Colors.white,
                 ),
-                validator: (value) =>
-                    value == null || value.isEmpty ? 'Material is required' : null,
+                validator: (value) => value == null || value.isEmpty
+                    ? 'Material is required'
+                    : null,
               ),
               const SizedBox(height: 16),
-
               TextFormField(
                 controller: _quantityController,
                 keyboardType: TextInputType.number,
@@ -155,7 +164,6 @@ class _WashIronPageState extends State<WashIronPage> {
                 },
               ),
               const SizedBox(height: 24),
-
               Card(
                 elevation: 2,
                 color: Colors.white,
@@ -186,7 +194,10 @@ class _WashIronPageState extends State<WashIronPage> {
                                   ?.copyWith(color: Colors.grey.shade700)),
                           Text(
                             'Rp$_totalCost',
-                            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(
                                   fontWeight: FontWeight.bold,
                                   color: primaryColor,
                                 ),
@@ -205,7 +216,6 @@ class _WashIronPageState extends State<WashIronPage> {
                 ),
               ),
               const SizedBox(height: 32),
-
               SizedBox(
                 height: 50,
                 child: ElevatedButton(

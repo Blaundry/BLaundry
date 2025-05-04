@@ -36,7 +36,7 @@ class _DashboardPageState extends State<DashboardPage> {
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
-          backgroundColor: Color(0xFF05588A),
+          backgroundColor: const Color(0xFF05588A),
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -72,7 +72,7 @@ class _DashboardPageState extends State<DashboardPage> {
           children: [
             // Blue Background (matches app bar)
             Container(
-              color: Color(0xFF05588A),
+              color: const Color(0xFF05588A),
             ),
 
             // Main Scrollable Content
@@ -84,7 +84,7 @@ class _DashboardPageState extends State<DashboardPage> {
                     children: [
                       Container(
                         height: 200,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           image: DecorationImage(
                             image: AssetImage('assets/laundry_bg.jpg'),
                             fit: BoxFit.cover,
@@ -209,19 +209,19 @@ class _DashboardPageState extends State<DashboardPage> {
                           child: Container(
                             padding: const EdgeInsets.all(20),
                             decoration: BoxDecoration(
-                              color: Color(0xFF29A3FF),
+                              color: const Color(0xFF29A3FF),
                               borderRadius: BorderRadius.circular(20),
                             ),
-                            child: Column(
+                            child: const Column(
                               children: [
-                                const Text(
+                                Text(
                                   "Estimated time remaining:",
                                   style: TextStyle(
                                     fontSize: 16,
                                     color: Colors.white,
                                   ),
                                 ),
-                                const SizedBox(height: 8),
+                                SizedBox(height: 8),
                                 Text(
                                   "1 days 15 hours",
                                   style: TextStyle(
@@ -254,7 +254,7 @@ class _DashboardPageState extends State<DashboardPage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Text(
+                              const Text(
                                 "Today's Offer",
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
