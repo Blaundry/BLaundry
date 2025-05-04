@@ -1,0 +1,2 @@
+C:/Users/Faqih Altaf Ghifari/BLaundry/android/app/.cxx/Debug/2o6x1m1l/armeabi-v7a/CMakeFiles/edit_cache.dir
+C:/Users/Faqih Altaf Ghifari/BLaundry/android/app/.cxx/Debug/2o6x1m1l/armeabi-v7a/CMakeFiles/rebuild_cache.dir
