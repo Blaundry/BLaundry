@@ -16,6 +16,55 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   int _selectedIndex = 0;
   String username = "Khidir Julian";
+  final PageController _pageController = PageController(viewportFraction: 0.8);
+
+  final List<Map<String, dynamic>> offers = [
+    {
+      'title': 'Weekend Special',
+      'description': '20% OFF on all services every Saturday',
+      'icon': Icons.weekend,
+      'color': Colors.orange,
+      'validUntil': 'Valid every weekend'
+    },
+    {
+      'title': 'First Time User',
+      'description': '15% OFF on your first order',
+      'icon': Icons.star,
+      'color': Colors.blue,
+      'validUntil': 'New customers only'
+    },
+    {
+      'title': 'Bulk Discount',
+      'description': '10kg+ laundry gets 10% OFF',
+      'icon': Icons.local_laundry_service,
+      'color': Colors.green,
+      'validUntil': 'Valid until Dec 2023'
+    },
+    
+    {
+      'title': 'Express Service',
+      'description': 'Free upgrade to express for orders >50kg',
+      'icon': Icons.flash_on,
+      'color': Colors.red,
+      'validUntil': 'Limited time offer'
+    },
+    
+    
+    {
+      'title': 'Early Bird',
+      'description': '10% OFF for orders placed before 10AM',
+      'icon': Icons.wb_sunny,
+      'color': Colors.amber,
+      'validUntil': 'Daily offer'
+    },
+    {
+      'title': 'Loyalty Reward',
+      'description': 'Free service after 10 orders',
+      'icon': Icons.loyalty,
+      'color': Colors.pink,
+      'validUntil': 'For all customers'
+    },
+  ];
 
   void _onNavBarTap(int index) {
     setState(() {
@@ -70,16 +119,12 @@ class _DashboardPageState extends State<DashboardPage> {
         ),
         body: Stack(
           children: [
-            // Blue Background (matches app bar)
-            Container(
-              color: Color(0xFF05588A),
-            ),
+            Container(color: Color(0xFF05588A)),
 
-            // Main Scrollable Content
             SingleChildScrollView(
               child: Column(
                 children: [
-                  // Header Image with Dark Overlay
+                  // Header with overlays
                   Stack(
                     children: [
                       Container(
@@ -95,7 +140,7 @@ class _DashboardPageState extends State<DashboardPage> {
                         height: 200,
                         decoration: BoxDecoration(
                           color: const Color.fromARGB(255, 33, 149, 243)
-                              .withOpacity(0.8), // Atur opasitas di sini
+                              .withOpacity(0.8),
                         ),
                       ),
                       Container(
@@ -130,22 +175,16 @@ class _DashboardPageState extends State<DashboardPage> {
                     ],
                   ),
 
-                  // White Container for Services (rounded top)
+                  // Service buttons
                   Container(
                     width: double.infinity,
                     decoration: const BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(20),
-                        topRight: Radius.circular(20),
-                        bottomLeft: Radius.circular(20),
-                        bottomRight: Radius.circular(20),
-                      ),
+                      borderRadius: BorderRadius.all(Radius.circular(20)),
                     ),
-                    padding: const EdgeInsets.only(top: 30, bottom: 30),
+                    padding: const EdgeInsets.symmetric(vertical: 30),
                     child: Column(
                       children: [
-                        // Services Row
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 15),
                           child: Row(
@@ -191,18 +230,17 @@ class _DashboardPageState extends State<DashboardPage> {
                     ),
                   ),
 
-                  // Blue Background Content Below White Container
+                  // Additional content
                   Container(
                     decoration: const BoxDecoration(
                       gradient: LinearGradient(
-                        colors: [Color(0xFF05588A),Color(0xFF0999F0), ],
+                        colors: [Color(0xFF05588A), Color(0xFF0999F0)],
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
                       ),
                     ),
                     child: Column(
                       children: [
-                        // Estimated Time
                         Padding(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 30, vertical: 30),
@@ -213,15 +251,15 @@ class _DashboardPageState extends State<DashboardPage> {
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Column(
-                              children: [
-                                const Text(
+                              children: const [
+                                Text(
                                   "Estimated time remaining:",
                                   style: TextStyle(
                                     fontSize: 16,
                                     color: Colors.white,
                                   ),
                                 ),
-                                const SizedBox(height: 8),
+                                SizedBox(height: 8),
                                 Text(
                                   "1 days 15 hours",
                                   style: TextStyle(
@@ -235,26 +273,18 @@ class _DashboardPageState extends State<DashboardPage> {
                           ),
                         ),
 
-                        // Large Scrollable Gap
                         const SizedBox(height: 100),
 
-                        // Today's Offer
                         Container(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 20),
+                          padding: const EdgeInsets.all(20),
                           decoration: const BoxDecoration(
                             color: Colors.white,
-                            borderRadius: BorderRadius.only(
-                              topLeft: Radius.circular(30),
-                              topRight: Radius.circular(30),
-                              bottomLeft: Radius.circular(30),
-                              bottomRight: Radius.circular(30),
-                            ),
+                            borderRadius: BorderRadius.all(Radius.circular(30)),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Text(
+                              const Text(
                                 "Today's Offer",
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
@@ -264,18 +294,31 @@ class _DashboardPageState extends State<DashboardPage> {
                                 ),
                               ),
                               const SizedBox(height: 16),
-                              Container(
-                                height: 150,
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(12),
-                                  border:
-                                      Border.all(color: Colors.grey.shade300),
+                              SizedBox(
+                                height: 180,
+                                child: PageView.builder(
+                                  controller: _pageController,
+                                  itemCount: offers.length,
+                                  itemBuilder: (context, index) {
+                                    return _buildOfferCard(offers[index]);
+                                  },
                                 ),
-                                child: const Center(
-                                  child: Text(
-                                    "Special offers will appear here",
-                                    style: TextStyle(color: Colors.grey),
+                              ),
+                              const SizedBox(height: 10),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: List.generate(
+                                  offers.length,
+                                  (index) => Container(
+                                    width: 8,
+                                    height: 8,
+                                    margin: const EdgeInsets.symmetric(horizontal: 4),
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: index == _selectedIndex
+                                          ? const Color(0xFF05588A)
+                                          : Colors.grey,
+                                    ),
                                   ),
                                 ),
                               ),
@@ -289,8 +332,6 @@ class _DashboardPageState extends State<DashboardPage> {
                 ],
               ),
             ),
-
-            // Wave Animation at Bottom
           ],
         ),
         bottomNavigationBar: BottomNavBaruser(
@@ -324,6 +365,64 @@ class _DashboardPageState extends State<DashboardPage> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildOfferCard(Map<String, dynamic> offer) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+      ),
+      margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [offer['color'].withOpacity(0.7), offer['color']],
+          ),
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(offer['icon'], size: 30, color: Colors.white),
+                const SizedBox(width: 10),
+                Text(
+                  offer['title'],
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 15),
+            Text(
+              offer['description'],
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 10),
+            Text(
+              offer['validUntil'],
+              style: TextStyle(
+                color: Colors.white.withOpacity(0.9),
+                fontSize: 12,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
