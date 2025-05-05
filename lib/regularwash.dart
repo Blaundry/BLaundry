@@ -1,5 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+final userId = FirebaseAuth.instance.currentUser?.uid;
 
 class RegularWashPage extends StatefulWidget {
   const RegularWashPage({super.key});
@@ -33,31 +37,36 @@ class _RegularWashPageState extends State<RegularWashPage> {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
+    try {
+      await FirebaseFirestore.instance.collection('orders').add({
+        'serviceType': 'regular',
+        'item': _itemNameController.text.trim(), 
+        'material': _itemModelController.text.trim(),
+        'quantity': int.parse(_quantityController.text.trim()),
+        'totalCost': _totalCost,
+        'createdAt': Timestamp.now(),
+        'status': 'In Process',
+        'userId': userId,
+      });
 
-    await Future.delayed(const Duration(seconds: 1));
+      _formKey.currentState!.reset();
+      setState(() {
+        _totalCost = 0;
+        _isLoading = false;
+      });
 
-    setState(() => _isLoading = false);
-
-    if (!mounted) return;
-
-    _formKey.currentState!.reset();
-    setState(() => _totalCost = 0);
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: const Text('Order saved successfully'),
-        backgroundColor: primaryColor,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('Regular order saved successfully'),
+          backgroundColor: primaryColor,
         ),
-        action: SnackBarAction(
-          label: 'OK',
-          textColor: Colors.white,
-          onPressed: () {},
-        ),
-      ),
-    );
+      );
+    } catch (e) {
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to save order: $e')),
+      );
+    }
   }
 
   @override

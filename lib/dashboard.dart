@@ -116,7 +116,12 @@ class _DashboardPageState extends State<DashboardPage> {
         ),
         body: Stack(
           children: [
-            Container(color: const Color(0xFF05588A)),
+            // Blue Background (matches app bar)
+            Container(
+              color: Color(0xFF05588A),
+            ),
+
+            // Main Scrollable Content
             SingleChildScrollView(
               child: Column(
                 children: [
@@ -221,6 +226,40 @@ class _DashboardPageState extends State<DashboardPage> {
                     ),
                     child: Column(
                       children: [
+                        // Estimated Time
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 30, vertical: 30),
+                          child: Container(
+                            padding: const EdgeInsets.all(20),
+                            decoration: BoxDecoration(
+                              color: Color(0xFF29A3FF),
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Column(
+                              children: [
+                                const Text(
+                                  "Estimated time remaining:",
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  "1 days 15 hours",
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        // Large Scrollable Gap
                         const SizedBox(height: 100),
                         Container(
                           padding: const EdgeInsets.all(20),
