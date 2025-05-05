@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "laundrybot-gwhx",
+  "private_key_id": "79cd5d8cb588f808279a781d2a5275545365ceea",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDn7BhLQDB9X5e1\n7+yHxwfC0h8ktICOnZdug8IeR14VpzgCPI03D1GWcADJRRhCUyZUE9VhXx9llM5H\nLEnlXWjKRJYNY8WDUXOPSw7nYhMWit3J+DRW5aHMiSlWR6l0YEfzr+myqZw3IQHv\nCBqRQhX+RnlMOxG2mqlFzYDfvVbAkGQVYLCJdgxUjdjyqD9lI10VShhvlw1FHRk8\nHsCumryKhqMMubTlpkIs1wLPHc9iWjCfBPGEdxJDl0D8yU4OhrhgajOlvCHL5OO6\nuiq5E7Ezw4/y40rbaME3e/MmDO5PC28mYhUerjX2NFWv8pivhQ2FnHN6urlC5Ry2\nooPsfjs9AgMBAAECggEAHybFuUSFHtn6Xpbm8508Fs2IHwiFugzt5wtt8AjlriKO\nBzLgmZ7boR7TOYr9MATLgatA/o67K2Gk9sdlTO3SjP9QaQ+tMIR+G/xYzfiM7Xq3\n7BCENeXV6Utv0NCDBjLb3J4U1bQq26F53oRSo+SMtWD8RaKA2xZZb/BOA/+CdGPP\nJyWeHG4q6lpdu7jnOTHY3RTgaP2rpDWJ+mmp/WA++FD1TJtKyFWzhkKyPmv62PJ/\nOiZZcGVIXdzBQnpTpS69bc7hionN5/WHy0LpezusaVYBndTlGvaV6qQjNKIpCeCv\nZ6XCAXJButSQUag2GKYVhxUNwfqSzV3sbp+QwiC7iwKBgQD745nYbFRm7jygjjZA\nXtlMWj7kme10PODBY43YL/xIEPVMlRNJRx0uVOmrcEufQaxJKgO5wMFyFlwwK5lx\n6A5sgNBOQFZmOwvqb5ScD+7KqfqVn0n53YNyWkuw6VfoRBqRCV7DWfgwPkhH5Vb+\nEcV+BKy+jjt43ZRD+yeYjDC3/wKBgQDrtRJxoQhJYBhm8crMW1iPkSjLDsMC3kaG\no7r99KO6YpXwYSwXkyQMJwq5JNrin2MlGwxoI61OOvka7kVVRk7O7ZNVN4uOCmpE\nfWw2qRxNgEwULg8jImH2+lOfGyQnWsNitLAZHdBooccTwuLDlOW8EjX6LPxHi/Vn\n0SkXnj3swwKBgGsXJfZcgDnOudns/GW7rZkHmUupocnUhB3UTJ8IL7MX+qJXkv6J\njH+BPGNV9+C6lBv7D+BuchAmL4WPU8qYxWEeFvHd6p3GJtfCHqWHJJfnUpFASrw/\nkD4S47FQU759Depx2GcnnhwsrqBagfS864EbTbIqWGCXnAyXAAucNq5TAoGAZg5I\nphprVBnfdvNKM6F5fvADEaialytWrgVGeZ7rJVB6S1JHnQ2AliJxaiii/Wy1qONF\nQ/Hun+i44wg3zOxcQwxqtoMOUboAuRb1O9WNA6GBT1uCAlxovl80xbciuEd8Qciq\nVrWp/yPM5qmDNdvKfNwFswS3VuMqpoDRogBKH7ECgYACuWCMtc/tzDlE43DSqNTI\nTQLuYSOoBs0exEi2k1AQ4cMGiwbthKDPz1q/VoCO7bpXTOVcC0h2M01Ifmso5MyP\nnLGsDIJeGksKNO3Qb8WF5yEmUjkypfPe1BfgN7nF6j5K64rFZayhvAAusluHWo3k\n7aLBmKLY8YTbRKx/n34UKQ==\n-----END PRIVATE KEY-----\n",
+  "client_email": "flutteragent@laundrybot-gwhx.iam.gserviceaccount.com",
+  "client_id": "100982825372426706618",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/flutteragent%40laundrybot-gwhx.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}

@@ -5,6 +5,7 @@ import 'package:blaundry_registlogin/washiron.dart';
 import 'package:blaundry_registlogin/myorder.dart';
 import 'package:blaundry_registlogin/button_navbar_user.dart';
 import 'package:blaundry_registlogin/profile.dart';
+import 'package:blaundry_registlogin/chatBot.dart'; 
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -40,7 +41,6 @@ class _DashboardPageState extends State<DashboardPage> {
       'color': Colors.green,
       'validUntil': 'Valid until Dec 2023'
     },
-    
     {
       'title': 'Express Service',
       'description': 'Free upgrade to express for orders >50kg',
@@ -48,8 +48,6 @@ class _DashboardPageState extends State<DashboardPage> {
       'color': Colors.red,
       'validUntil': 'Limited time offer'
     },
-    
-    
     {
       'title': 'Early Bird',
       'description': '10% OFF for orders placed before 10AM',
@@ -85,7 +83,7 @@ class _DashboardPageState extends State<DashboardPage> {
       child: Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: false,
-          backgroundColor: Color(0xFF05588A),
+          backgroundColor: const Color(0xFF05588A),
           title: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -98,8 +96,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 onTap: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                        builder: (context) => const ProfilePage()),
+                    MaterialPageRoute(builder: (context) => const ProfilePage()),
                   );
                 },
                 child: CircleAvatar(
@@ -119,17 +116,15 @@ class _DashboardPageState extends State<DashboardPage> {
         ),
         body: Stack(
           children: [
-            Container(color: Color(0xFF05588A)),
-
+            Container(color: const Color(0xFF05588A)),
             SingleChildScrollView(
               child: Column(
                 children: [
-                  // Header with overlays
                   Stack(
                     children: [
                       Container(
                         height: 200,
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           image: DecorationImage(
                             image: AssetImage('assets/laundry_bg.jpg'),
                             fit: BoxFit.cover,
@@ -138,16 +133,11 @@ class _DashboardPageState extends State<DashboardPage> {
                       ),
                       Container(
                         height: 200,
-                        decoration: BoxDecoration(
-                          color: const Color.fromARGB(255, 33, 149, 243)
-                              .withOpacity(0.8),
-                        ),
+                        color: const Color(0xFF2196F3).withOpacity(0.8),
                       ),
                       Container(
                         height: 200,
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.4),
-                        ),
+                        color: Colors.black.withOpacity(0.4),
                         child: Center(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
@@ -174,8 +164,6 @@ class _DashboardPageState extends State<DashboardPage> {
                       ),
                     ],
                   ),
-
-                  // Service buttons
                   Container(
                     width: double.infinity,
                     decoration: const BoxDecoration(
@@ -196,9 +184,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                 Colors.purple,
                                 () => Navigator.push(
                                   context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const RegularWashPage()),
+                                  MaterialPageRoute(builder: (context) => const RegularWashPage()),
                                 ),
                               ),
                               _buildServiceButton(
@@ -207,9 +193,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                 Colors.orange,
                                 () => Navigator.push(
                                   context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const WashIronPage()),
+                                  MaterialPageRoute(builder: (context) => const WashIronPage()),
                                 ),
                               ),
                               _buildServiceButton(
@@ -218,9 +202,7 @@ class _DashboardPageState extends State<DashboardPage> {
                                 Colors.blue,
                                 () => Navigator.push(
                                   context,
-                                  MaterialPageRoute(
-                                      builder: (context) =>
-                                          const ShoeWashPage()),
+                                  MaterialPageRoute(builder: (context) => const ShoeWashPage()),
                                 ),
                               ),
                             ],
@@ -229,8 +211,6 @@ class _DashboardPageState extends State<DashboardPage> {
                       ],
                     ),
                   ),
-
-                  // Additional content
                   Container(
                     decoration: const BoxDecoration(
                       gradient: LinearGradient(
@@ -242,39 +222,32 @@ class _DashboardPageState extends State<DashboardPage> {
                     child: Column(
                       children: [
                         Padding(
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 30, vertical: 30),
+                          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 30),
                           child: Container(
                             padding: const EdgeInsets.all(20),
                             decoration: BoxDecoration(
-                              color: Color(0xFF29A3FF),
+                              color: const Color(0xFF29A3FF),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Column(
                               children: const [
                                 Text(
                                   "Estimated time remaining:",
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.white,
-                                  ),
+                                  style: TextStyle(fontSize: 16, color: Colors.white),
                                 ),
                                 SizedBox(height: 8),
                                 Text(
                                   "1 days 15 hours",
                                   style: TextStyle(
-                                    fontSize: 24,
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.white,
-                                  ),
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.white),
                                 ),
                               ],
                             ),
                           ),
                         ),
-
                         const SizedBox(height: 100),
-
                         Container(
                           padding: const EdgeInsets.all(20),
                           decoration: const BoxDecoration(
@@ -305,23 +278,6 @@ class _DashboardPageState extends State<DashboardPage> {
                                 ),
                               ),
                               const SizedBox(height: 10),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: List.generate(
-                                  offers.length,
-                                  (index) => Container(
-                                    width: 8,
-                                    height: 8,
-                                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: index == _selectedIndex
-                                          ? const Color(0xFF05588A)
-                                          : Colors.grey,
-                                    ),
-                                  ),
-                                ),
-                              ),
                               const SizedBox(height: 30),
                             ],
                           ),
@@ -338,12 +294,21 @@ class _DashboardPageState extends State<DashboardPage> {
           selectedIndex: _selectedIndex.clamp(0, 1),
           onTap: _onNavBarTap,
         ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const ChatBotPage()),
+            );
+          },
+          backgroundColor: Colors.blueAccent,
+          child: const Icon(Icons.chat),
+        ),
       ),
     );
   }
 
-  Widget _buildServiceButton(
-      IconData icon, String text, Color color, VoidCallback onTap) {
+  Widget _buildServiceButton(IconData icon, String text, Color color, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -359,10 +324,7 @@ class _DashboardPageState extends State<DashboardPage> {
           const SizedBox(height: 8),
           Text(
             text,
-            style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-            ),
+            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
           ),
         ],
       ),
@@ -372,9 +334,7 @@ class _DashboardPageState extends State<DashboardPage> {
   Widget _buildOfferCard(Map<String, dynamic> offer) {
     return Card(
       elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
       margin: const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
       child: Container(
         padding: const EdgeInsets.all(16),
@@ -407,10 +367,7 @@ class _DashboardPageState extends State<DashboardPage> {
             const SizedBox(height: 15),
             Text(
               offer['description'],
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-              ),
+              style: const TextStyle(color: Colors.white, fontSize: 16),
             ),
             const SizedBox(height: 10),
             Text(
