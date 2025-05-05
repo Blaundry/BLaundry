@@ -221,32 +221,6 @@ class _DashboardPageState extends State<DashboardPage> {
                     ),
                     child: Column(
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 30),
-                          child: Container(
-                            padding: const EdgeInsets.all(20),
-                            decoration: BoxDecoration(
-                              color: const Color(0xFF29A3FF),
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: Column(
-                              children: const [
-                                Text(
-                                  "Estimated time remaining:",
-                                  style: TextStyle(fontSize: 16, color: Colors.white),
-                                ),
-                                SizedBox(height: 8),
-                                Text(
-                                  "1 days 15 hours",
-                                  style: TextStyle(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
                         const SizedBox(height: 100),
                         Container(
                           padding: const EdgeInsets.all(20),
