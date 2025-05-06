@@ -12,6 +12,28 @@ class CustomerOrderPage extends StatefulWidget {
 
 class _CustomerOrderPageState extends State<CustomerOrderPage> {
   int _selectedIndex = 2;
+  String _searchQuery = '';
+  String _sortBy = 'serviceType';
+  bool _isAscending = true;
+
+  Map<String, Map<String, dynamic>> _userMap = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadUsers();
+  }
+
+  void _loadUsers() async {
+    final snapshot = await FirebaseFirestore.instance.collection('users').get();
+    final userMap = <String, Map<String, dynamic>>{};
+    for (var doc in snapshot.docs) {
+      userMap[doc.id] = doc.data() as Map<String, dynamic>;
+    }
+    setState(() {
+      _userMap = userMap;
+    });
+  }
 
   void _onNavBarTap(int index) {
     setState(() {
@@ -35,10 +57,8 @@ class _CustomerOrderPageState extends State<CustomerOrderPage> {
 
   @override
   Widget build(BuildContext context) {
-    final Stream<QuerySnapshot> _orderStream = FirebaseFirestore.instance
-        .collection('orders')
-        .orderBy('createdAt', descending: true)
-        .snapshots();
+    final Stream<QuerySnapshot> _orderStream =
+        FirebaseFirestore.instance.collection('orders').snapshots();
 
     return Scaffold(
       appBar: AppBar(
@@ -67,8 +87,13 @@ class _CustomerOrderPageState extends State<CustomerOrderPage> {
               ),
             ),
             child: TextField(
+              onChanged: (query) {
+                setState(() {
+                  _searchQuery = query.toLowerCase();
+                });
+              },
               decoration: InputDecoration(
-                hintText: "Search",
+                hintText: "Search by Customer Name",
                 filled: true,
                 fillColor: Colors.white,
                 prefixIcon: const Icon(Icons.search),
@@ -79,6 +104,39 @@ class _CustomerOrderPageState extends State<CustomerOrderPage> {
               ),
             ),
           ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              DropdownButton<String>(
+                value: _sortBy,
+                onChanged: (newSortBy) {
+                  setState(() {
+                    _sortBy = newSortBy!;
+                  });
+                },
+                items: const [
+                  DropdownMenuItem(
+                    value: 'serviceType',
+                    child: Text("Sort by Service Type"),
+                  ),
+                  DropdownMenuItem(
+                    value: 'status',
+                    child: Text("Sort by Status"),
+                  ),
+                ],
+              ),
+              IconButton(
+                icon: Icon(
+                  _isAscending ? Icons.arrow_upward : Icons.arrow_downward,
+                ),
+                onPressed: () {
+                  setState(() {
+                    _isAscending = !_isAscending;
+                  });
+                },
+              ),
+            ],
+          ),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
               stream: _orderStream,
@@ -86,21 +144,75 @@ class _CustomerOrderPageState extends State<CustomerOrderPage> {
                 if (snapshot.hasError) {
                   return const Center(child: Text('Error loading orders'));
                 }
-                if (snapshot.connectionState == ConnectionState.waiting) {
+                if (snapshot.connectionState == ConnectionState.waiting ||
+                    _userMap.isEmpty) {
                   return const Center(child: CircularProgressIndicator());
                 }
 
                 final orders = snapshot.data!.docs;
 
-                if (orders.isEmpty) {
+                final filteredOrders = orders.where((order) {
+                  final orderData = order.data() as Map<String, dynamic>;
+                  final userId = orderData['userId'];
+                  final userData = _userMap[userId];
+
+                  if (_searchQuery.isEmpty) return true;
+                  if (userData == null) return false;
+
+                  final userName = userData['name']?.toLowerCase() ?? '';
+                  return userName.contains(_searchQuery);
+                }).toList();
+
+                filteredOrders.sort((a, b) {
+                  final aData = a.data() as Map<String, dynamic>;
+                  final bData = b.data() as Map<String, dynamic>;
+
+                  if (_sortBy == 'serviceType') {
+                    final aService = (aData['serviceType'] ?? '') as String;
+                    final bService = (bData['serviceType'] ?? '') as String;
+                    return _isAscending
+                        ? aService.compareTo(bService)
+                        : bService.compareTo(aService);
+                  } else if (_sortBy == 'status') {
+                    int getPriority(String status) {
+                      switch (status) {
+                        case 'Finished':
+                          return 3;
+                        case 'Processed':
+                          return 2;
+                        case 'Pending to Process':
+                          return 1;
+                        default:
+                          return 0;
+                      }
+                    }
+
+                    final aPriority = getPriority(aData['status'] ?? '');
+                    final bPriority = getPriority(bData['status'] ?? '');
+
+                    return _isAscending
+                        ? aPriority.compareTo(bPriority)
+                        : bPriority.compareTo(aPriority);
+                  }
+
+                  return 0;
+                });
+
+                if (filteredOrders.isEmpty) {
                   return const Center(child: Text('No orders found'));
                 }
 
                 return ListView.builder(
-                  itemCount: orders.length,
+                  itemCount: filteredOrders.length,
                   itemBuilder: (context, index) {
-                    final data = orders[index].data() as Map<String, dynamic>;
-                    final docId = orders[index].id;
+                    final data =
+                        filteredOrders[index].data() as Map<String, dynamic>;
+                    final docId = filteredOrders[index].id;
+                    final userId = data['userId'];
+                    final userData = _userMap[userId];
+
+                    final userName = userData?['name'] ?? 'Unknown';
+                    final userEmail = userData?['email'] ?? 'Unknown';
 
                     return orderCard(
                       context,
@@ -108,6 +220,8 @@ class _CustomerOrderPageState extends State<CustomerOrderPage> {
                       service: data['serviceType'] ?? 'Unknown',
                       price: data['totalCost']?.toString() ?? 'Rp.0',
                       status: data['status'] ?? 'Unknown',
+                      userName: userName,
+                      userEmail: userEmail,
                     );
                   },
                 );
@@ -129,6 +243,8 @@ class _CustomerOrderPageState extends State<CustomerOrderPage> {
     required String service,
     required String price,
     required String status,
+    required String userName,
+    required String userEmail,
   }) {
     List<String> statusOptions = [
       'Pending to Process',
@@ -144,13 +260,13 @@ class _CustomerOrderPageState extends State<CustomerOrderPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(service,
-                style:
-                    const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
             const SizedBox(height: 4),
             Text("ID: $orderId"),
+            Text("Customer: $userName ($userEmail)"),
             Text("Price: $price"),
             const SizedBox(height: 8),
-            const Text("Status:",
+            const Text("Status: ",
                 style: TextStyle(fontWeight: FontWeight.bold)),
             const SizedBox(height: 4),
             DropdownButtonFormField<String>(

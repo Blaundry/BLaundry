@@ -1,9 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'regist.dart';
-import 'dashboard.dart';
+import 'dashboard.dart'; // Ensure this accepts username internally
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import 'package:blaundry_registlogin/welcome.dart'; // Your WelcomePage
 
 class LoginCustomerPage extends StatefulWidget {
   const LoginCustomerPage({super.key});
@@ -24,26 +24,29 @@ class _LoginCustomerPageState extends State<LoginCustomerPage> {
     if (email.isEmpty) {
       _showMessage('Email cannot be empty');
     } else if (password.length < 6 || password.length > 8) {
-      _showMessage('Password must be 6-8 characters');
+      _showMessage('Password must be 6–8 characters');
     } else {
       try {
         final credential = await FirebaseAuth.instance
             .signInWithEmailAndPassword(email: email, password: password);
 
-        // Ambil UID user
         String uid = credential.user!.uid;
 
-        // Ambil data user dari Firestore
-        DocumentSnapshot userDoc =
-            await FirebaseFirestore.instance.collection('users').doc(uid).get();
+        DocumentSnapshot userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(uid)
+            .get();
 
         if (userDoc.exists) {
           String role = userDoc['role'];
 
           if (role == 'user') {
+            // Navigate to DashboardPage without passing username
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const DashboardPage()),
+              MaterialPageRoute(
+                builder: (_) => const DashboardPage(),
+              ),
             );
           } else {
             _showMessage('Access denied. Only users can login here.');
@@ -66,12 +69,24 @@ class _LoginCustomerPageState extends State<LoginCustomerPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.blue,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const WelcomePage()),
+            );
+          },
+        ),
+      ),
       body: SingleChildScrollView(
         child: Column(
           children: [
             Container(
               width: double.infinity,
-              height: MediaQuery.of(context).size.height * 0.35,
+              height: MediaQuery.of(context).size.height * 0.28,
               decoration: const BoxDecoration(
                 color: Colors.blue,
                 borderRadius: BorderRadius.only(
@@ -83,9 +98,10 @@ class _LoginCustomerPageState extends State<LoginCustomerPage> {
               child: const Text(
                 'B-Laundry',
                 style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white),
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
             ),
             Padding(

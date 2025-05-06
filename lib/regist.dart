@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:blaundry_registlogin/login_customer.dart';
 import 'welcome.dart';
 
 class RegistPage extends StatefulWidget {
@@ -14,6 +15,8 @@ class _RegistPageState extends State<RegistPage> {
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController = TextEditingController();
 
@@ -36,26 +39,34 @@ class _RegistPageState extends State<RegistPage> {
 
     setState(() => _isLoading = true);
 
-    String name = _nameController.text.trim();
     String email = _emailController.text.trim();
-    String password = _passwordController.text;
+    String password = _passwordController.text.trim();
+    String name = _nameController.text.trim();
+    String phone = _phoneController.text.trim();
+    String address = _addressController.text.trim();
 
     try {
+      // Register the user
       UserCredential userCredential = await FirebaseAuth.instance
           .createUserWithEmailAndPassword(email: email, password: password);
 
-      
+      // Save additional user data to Firestore
       await FirebaseFirestore.instance
           .collection('users')
           .doc(userCredential.user!.uid)
           .set({
-        'name': name,
+        'uid': userCredential.user!.uid,
         'email': email,
-        'password': password, 
+        'name': name,
+        'phone': phone,
+        'address': address,
         'role': 'user',
+        'createdAt': Timestamp.now(),
       });
 
-      _showMessage('Registration Success!', color: Colors.green);
+      _showMessage('Registration successful!', color: Colors.green);
+
+      // Navigate to welcome screen after delay
       Future.delayed(const Duration(seconds: 2), () {
         Navigator.pushAndRemoveUntil(
           context,
@@ -65,20 +76,48 @@ class _RegistPageState extends State<RegistPage> {
       });
     } on FirebaseAuthException catch (e) {
       _showMessage(e.message ?? 'Registration failed');
+    } catch (e) {
+      _showMessage('An error occurred: $e');
     } finally {
       setState(() => _isLoading = false);
     }
   }
 
   @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    _phoneController.dispose();
+    _addressController.dispose();
+    _passwordController.dispose();
+    _confirmPasswordController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Colors.blue,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const LoginCustomerPage(),
+              ),
+            );
+          },
+        ),
+      ),
       body: SingleChildScrollView(
         child: Column(
           children: [
             Container(
               width: double.infinity,
-              height: MediaQuery.of(context).size.height * 0.3,
+              height: MediaQuery.of(context).size.height * 0.28,
               decoration: const BoxDecoration(
                 color: Colors.blue,
                 borderRadius: BorderRadius.only(
@@ -88,11 +127,12 @@ class _RegistPageState extends State<RegistPage> {
               ),
               alignment: Alignment.center,
               child: const Text(
-                'B-Laundry',
+                "B-Laundry",
                 style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white),
+                  fontSize: 32,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
               ),
             ),
             Padding(
@@ -102,9 +142,9 @@ class _RegistPageState extends State<RegistPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Register',
-                        style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                    const Text('Register', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
                     const SizedBox(height: 10),
+
                     const Text('Name', style: TextStyle(fontWeight: FontWeight.w600)),
                     TextFormField(
                       controller: _nameController,
@@ -112,22 +152,19 @@ class _RegistPageState extends State<RegistPage> {
                         hintText: 'Enter your name',
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'Name cannot be empty';
-                        }
-                        return null;
-                      },
+                      validator: (value) =>
+                          (value == null || value.trim().isEmpty) ? 'Name cannot be empty' : null,
                     ),
                     const SizedBox(height: 10),
+
                     const Text('Email', style: TextStyle(fontWeight: FontWeight.w600)),
                     TextFormField(
                       controller: _emailController,
+                      keyboardType: TextInputType.emailAddress,
                       decoration: InputDecoration(
                         hintText: 'example@gmail.com',
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                       ),
-                      keyboardType: TextInputType.emailAddress,
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
                           return 'Email cannot be empty';
@@ -138,6 +175,38 @@ class _RegistPageState extends State<RegistPage> {
                       },
                     ),
                     const SizedBox(height: 10),
+
+                    const Text('Phone Number', style: TextStyle(fontWeight: FontWeight.w600)),
+                    TextFormField(
+                      controller: _phoneController,
+                      keyboardType: TextInputType.phone,
+                      decoration: InputDecoration(
+                        hintText: 'Enter your phone number',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Phone number cannot be empty';
+                        } else if (!RegExp(r'^[0-9]{10,15}$').hasMatch(value)) {
+                          return 'Invalid phone number';
+                        }
+                        return null;
+                      },
+                    ),
+                    const SizedBox(height: 10),
+
+                    const Text('Address', style: TextStyle(fontWeight: FontWeight.w600)),
+                    TextFormField(
+                      controller: _addressController,
+                      decoration: InputDecoration(
+                        hintText: 'Enter your address',
+                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      validator: (value) =>
+                          (value == null || value.trim().isEmpty) ? 'Address cannot be empty' : null,
+                    ),
+                    const SizedBox(height: 10),
+
                     const Text('Password', style: TextStyle(fontWeight: FontWeight.w600)),
                     TextFormField(
                       controller: _passwordController,
@@ -152,16 +221,14 @@ class _RegistPageState extends State<RegistPage> {
                           },
                         ),
                       ),
-                      validator: (value) {
-                        if (value == null || value.length < 6 || value.length > 8) {
-                          return 'Password must be 6-8 characters';
-                        }
-                        return null;
-                      },
+                      validator: (value) =>
+                          (value == null || value.length < 6 || value.length > 8)
+                              ? 'Password must be 6-8 characters'
+                              : null,
                     ),
                     const SizedBox(height: 10),
-                    const Text('Confirm Password',
-                        style: TextStyle(fontWeight: FontWeight.w600)),
+
+                    const Text('Confirm Password', style: TextStyle(fontWeight: FontWeight.w600)),
                     TextFormField(
                       controller: _confirmPasswordController,
                       obscureText: !_isConfirmPasswordVisible,
@@ -169,23 +236,17 @@ class _RegistPageState extends State<RegistPage> {
                         hintText: 'Repeat password',
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                         suffixIcon: IconButton(
-                          icon: Icon(_isConfirmPasswordVisible
-                              ? Icons.visibility
-                              : Icons.visibility_off),
+                          icon: Icon(_isConfirmPasswordVisible ? Icons.visibility : Icons.visibility_off),
                           onPressed: () {
-                            setState(() => _isConfirmPasswordVisible =
-                                !_isConfirmPasswordVisible);
+                            setState(() => _isConfirmPasswordVisible = !_isConfirmPasswordVisible);
                           },
                         ),
                       ),
-                      validator: (value) {
-                        if (value != _passwordController.text) {
-                          return 'Passwords do not match';
-                        }
-                        return null;
-                      },
+                      validator: (value) =>
+                          (value != _passwordController.text) ? 'Passwords do not match' : null,
                     ),
                     const SizedBox(height: 20),
+
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
@@ -196,8 +257,10 @@ class _RegistPageState extends State<RegistPage> {
                         ),
                         child: _isLoading
                             ? const CircularProgressIndicator(color: Colors.white)
-                            : const Text('Register',
-                                style: TextStyle(color: Colors.white, fontSize: 16)),
+                            : const Text(
+                                'Register',
+                                style: TextStyle(color: Colors.white, fontSize: 16),
+                              ),
                       ),
                     ),
                   ],
