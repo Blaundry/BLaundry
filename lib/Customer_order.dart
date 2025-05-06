@@ -62,6 +62,7 @@ class _CustomerOrderPageState extends State<CustomerOrderPage> {
 
     return Scaffold(
       appBar: AppBar(
+        automaticallyImplyLeading: false, 
         backgroundColor: Colors.blue.shade800,
         elevation: 0,
         toolbarHeight: 80,
@@ -247,6 +248,7 @@ class _CustomerOrderPageState extends State<CustomerOrderPage> {
     required String userEmail,
   }) {
     List<String> statusOptions = [
+      'Payment',
       'Pending to Process',
       'Processed',
       'Finished',
@@ -292,7 +294,10 @@ class _CustomerOrderPageState extends State<CustomerOrderPage> {
                     textColor = Colors.blue;
                     break;
                   case 'Pending to Process':
-                    textColor = Colors.grey;
+                    textColor = const Color.fromARGB(255, 231, 178, 5);
+                    break;
+                  case 'Payment':
+                    textColor = Colors.red;
                     break;
                   default:
                     textColor = Colors.black;
@@ -304,7 +309,9 @@ class _CustomerOrderPageState extends State<CustomerOrderPage> {
                     children: [
                       Icon(Icons.check_circle, color: textColor, size: 18),
                       const SizedBox(width: 8),
-                      Text(value, style: TextStyle(color: textColor)),
+                      Text(        
+                        value == 'Payment' ? 'Payment is Required' : value,
+                        style: TextStyle(color: textColor),),
                     ],
                   ),
                 );

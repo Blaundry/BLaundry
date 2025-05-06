@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:blaundry_registlogin/regularwash.dart';
 import 'package:blaundry_registlogin/shoewash.dart';
@@ -27,6 +28,15 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
   }
 
   Future<void> _fetchUserName() async {
+    final prefs = await SharedPreferences.getInstance();
+    final cachedName = prefs.getString('username');
+
+    if (cachedName != null) {
+      setState(() {
+        _userName = cachedName;
+      });
+    }
+
     final user = FirebaseAuth.instance.currentUser;
     if (user != null) {
       final userDoc = await FirebaseFirestore.instance
@@ -34,10 +44,11 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
           .doc(user.uid)
           .get();
       final name = userDoc.data()?['name'];
-      if (name != null) {
+      if (name != null && name != cachedName) {
         setState(() {
           _userName = name;
         });
+        await prefs.setString('username', name);
       }
     }
   }
@@ -198,13 +209,6 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
                 ),
               ),
             ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Image.asset(
-                'assets/logosimple4.png',
-                width: 100,
-              ),
-            ),
           ],
         ),
       ),
@@ -228,7 +232,9 @@ class _DashboardAdminPageState extends State<DashboardAdminPage> {
               child: const Text("No"),
             ),
             TextButton(
-              onPressed: () {
+              onPressed: () async {
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.remove('username');
                 Navigator.of(context).pop();
                 Navigator.pushReplacement(
                   context,

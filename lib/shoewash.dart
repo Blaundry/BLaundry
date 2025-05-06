@@ -37,15 +37,21 @@ class _ShoeWashPageState extends State<ShoeWashPage> {
 
     setState(() => _isLoading = true);
     try {
-      await FirebaseFirestore.instance.collection('orders').add({
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception('User not logged in');
+      }
+
+      DocumentReference orderRef = await FirebaseFirestore.instance.collection('orders').add({
         'serviceType': 'shoe',
         'shoeType': _shoeTypeController.text.trim(),
         'material': _materialController.text.trim(),
         'quantity': int.parse(_quantityController.text.trim()),
         'totalCost': _totalCost,
         'createdAt': Timestamp.now(),
-        'status': 'In Process',
-        'userId': userId,
+        'status': 'Payment',
+        'paymentStatus': false,
+        'userId': user.uid,
       });
 
       _formKey.currentState!.reset();
@@ -67,6 +73,7 @@ class _ShoeWashPageState extends State<ShoeWashPage> {
       );
     }
   }
+
 
   @override
   void dispose() {

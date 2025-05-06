@@ -1,15 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:uuid/uuid.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class PaymentPage extends StatefulWidget {
-  const PaymentPage({super.key});
+  final String orderId; // Pass the order ID
+
+  const PaymentPage({super.key, required this.orderId});
 
   @override
   State<PaymentPage> createState() => _PaymentPageState();
 }
 
 class _PaymentPageState extends State<PaymentPage> {
+  double? _totalAmount;
+  bool _isLoading = true;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   String _selectedMethod = 'transfer';
   String? _qrToken;
   final Uuid _uuid = const Uuid();
@@ -22,12 +29,79 @@ class _PaymentPageState extends State<PaymentPage> {
   void initState() {
     super.initState();
     _generateQRToken();
+    _fetchOrderAmount();
+  }
+
+  Future<void> _fetchOrderAmount() async {
+    try {
+      final orderSnapshot = await _firestore.collection('orders').doc(widget.orderId).get();
+      if (orderSnapshot.exists) {
+        final data = orderSnapshot.data();
+        setState(() {
+          _totalAmount = (data?['totalCost'] ?? 0).toDouble();
+          _isLoading = false;
+        });
+      }
+    } catch (e) {
+      print("Error fetching order: $e");
+      setState(() => _isLoading = false);
+    }
   }
 
   void _generateQRToken() {
     setState(() {
       _qrToken = _uuid.v4(); // Generate unique token
     });
+  }
+
+  Future<void> _updatePaymentStatus() async {
+    if (_isLoading || _totalAmount == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Please wait, loading order details..."),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    try {
+      final paymentData = {
+        'orderId': widget.orderId,
+        'paymentMethod': _selectedMethod,
+        'paymentDate': Timestamp.now(),
+        'amount': _totalAmount,
+      };
+
+      if (_selectedMethod == 'qr') {
+        paymentData['qrToken'] = _qrToken;
+      }
+
+      await _firestore.collection('payments').add(paymentData);
+
+      await _firestore.collection('orders').doc(widget.orderId).update({
+        'paymentStatus': true,
+        'status' : 'Pending to Process'
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Payment details updated successfully"),
+          backgroundColor: _successColor,
+        ),
+      );
+
+      await Future.delayed(const Duration(milliseconds: 500));
+      Navigator.pop(context);
+    } catch (e) {
+      print("Error updating payment status: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Error updating payment details"),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   Widget _buildPaymentMethodSelector() {
@@ -78,18 +152,22 @@ class _PaymentPageState extends State<PaymentPage> {
       title: Text(title),
       trailing: Radio<String>(
         value: value,
-        groupValue: _selectedMethod,
+        groupValue: _selectedMethod,  // Ensures only one can be selected
         activeColor: _primaryColor,
         onChanged: (String? value) {
           if (value != null) {
-            setState(() => _selectedMethod = value);
-            if (value == 'qr') _generateQRToken();
+            setState(() {
+              _selectedMethod = value;  // Updates the selected method
+              if (value == 'qr') _generateQRToken();  // Regenerate QR token if QR is selected
+            });
           }
         },
       ),
       onTap: () {
-        setState(() => _selectedMethod = value);
-        if (value == 'qr') _generateQRToken();
+        setState(() {
+          _selectedMethod = value;
+          if (value == 'qr') _generateQRToken();
+        });
       },
       contentPadding: const EdgeInsets.symmetric(horizontal: 16),
       shape: RoundedRectangleBorder(
@@ -97,6 +175,7 @@ class _PaymentPageState extends State<PaymentPage> {
       ),
     );
   }
+
 
   Widget _buildTransferDetails() {
     return Column(
@@ -125,7 +204,7 @@ class _PaymentPageState extends State<PaymentPage> {
               const Divider(height: 24),
               _buildBankDetailRow("Account Holder", "PT Laundry Bersih"),
               const Divider(height: 24),
-              _buildBankDetailRow("Amount", "Rp 85.000"),
+              _buildBankDetailRow("Amount", _totalAmount != null ? "Rp ${_totalAmount!.toStringAsFixed(0)}" : "Loading..."),
             ],
           ),
         ),
@@ -237,13 +316,7 @@ class _PaymentPageState extends State<PaymentPage> {
               width: double.infinity,
               child: ElevatedButton(
                 onPressed: () {
-                  // Handle payment confirmation
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text("Payment method selected"),
-                      backgroundColor: _successColor,
-                    ),
-                  );
+                  _updatePaymentStatus();
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _primaryColor,
@@ -254,7 +327,7 @@ class _PaymentPageState extends State<PaymentPage> {
                 ),
                 child: const Text(
                   "Confirm Payment",
-                  style: TextStyle(fontSize: 16,color: Colors.white),
+                  style: TextStyle(fontSize: 16, color: Colors.white),
                 ),
               ),
             ),

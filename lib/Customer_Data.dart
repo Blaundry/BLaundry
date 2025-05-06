@@ -49,7 +49,7 @@ class _CustomerDataPageState extends State<CustomerDataPage> {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
-        backgroundColor: const Color(0xFF05588A),
+        backgroundColor: Colors.blue.shade800,
         elevation: 0,
         toolbarHeight: 80,
         title: const Padding(
@@ -57,9 +57,7 @@ class _CustomerDataPageState extends State<CustomerDataPage> {
           child: Text(
             "Customers Data",
             style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
+                fontSize: 24, fontWeight: FontWeight.bold, color: Colors.white
             ),
           ),
         ),
@@ -68,11 +66,10 @@ class _CustomerDataPageState extends State<CustomerDataPage> {
       body: Column(
         children: [
           Container(
-            width: double.infinity,
-            padding: const EdgeInsets.only(top: 10, bottom: 20, left: 16, right: 16),
-            decoration: const BoxDecoration(
+            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+            decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [Color(0xFF05588A), Color(0xFF0999F0)],
+                colors: [Colors.blue.shade800, Colors.blue.shade400],
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
               ),
@@ -80,7 +77,6 @@ class _CustomerDataPageState extends State<CustomerDataPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 20),
                 TextField(
                   onChanged: (value) {
                     setState(() {
@@ -93,7 +89,7 @@ class _CustomerDataPageState extends State<CustomerDataPage> {
                     filled: true,
                     fillColor: Colors.white,
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(30),
+                      borderRadius: BorderRadius.circular(25),
                       borderSide: BorderSide.none,
                     ),
                   ),

@@ -38,15 +38,21 @@ class _RegularWashPageState extends State<RegularWashPage> {
 
     setState(() => _isLoading = true);
     try {
-      await FirebaseFirestore.instance.collection('orders').add({
+      final user = FirebaseAuth.instance.currentUser;
+      if (user == null) {
+        throw Exception('User not logged in');
+      }
+
+      DocumentReference orderRef = await FirebaseFirestore.instance.collection('orders').add({
         'serviceType': 'regular',
         'item': _itemNameController.text.trim(), 
         'material': _itemModelController.text.trim(),
         'quantity': int.parse(_quantityController.text.trim()),
         'totalCost': _totalCost,
         'createdAt': Timestamp.now(),
-        'status': 'In Process',
-        'userId': userId,
+        'status': 'Payment',
+        'userId': user.uid,
+        'paymentStatus': false,
       });
 
       _formKey.currentState!.reset();

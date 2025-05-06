@@ -6,7 +6,7 @@ import 'package:blaundry_registlogin/myorder.dart';
 import 'package:blaundry_registlogin/button_navbar_user.dart';
 import 'package:blaundry_registlogin/profile.dart';
 import 'package:blaundry_registlogin/chatBot.dart';
-import 'package:blaundry_registlogin/login_customer.dart'; 
+import 'package:blaundry_registlogin/login_customer.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -20,28 +20,6 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   int _selectedIndex = 0;
   String _userName = 'User';
-
-  @override
-  void initState() {
-    super.initState();
-    _fetchUserName();
-  }
-
-  Future<void> _fetchUserName() async {
-    final user = FirebaseAuth.instance.currentUser;
-    if (user != null) {
-      final userDoc = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(user.uid)
-          .get();
-      final name = userDoc.data()?['name'];
-      if (name != null) {
-        setState(() {
-          _userName = name;
-        });
-      }
-    }
-  }
 
   final PageController _pageController = PageController(viewportFraction: 0.8);
 
@@ -90,6 +68,36 @@ class _DashboardPageState extends State<DashboardPage> {
     },
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    _setAuthPersistence();
+    _fetchUserName();
+  }
+
+  Future<void> _setAuthPersistence() async {
+    await FirebaseAuth.instance.setPersistence(Persistence.SESSION);
+  }
+
+  Future<void> refreshAuthState() async {
+    await FirebaseAuth.instance.currentUser?.reload();
+  }
+
+  Future<void> _fetchUserName() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      if (doc.exists && doc.data()!.containsKey('name')) {
+        setState(() {
+          _userName = doc['name'];
+        });
+      }
+    }
+  }
+
   void _onNavBarTap(int index) {
     setState(() {
       _selectedIndex = index;
@@ -123,7 +131,7 @@ class _DashboardPageState extends State<DashboardPage> {
                   PopupMenuButton<String>(
                     onSelected: (value) {
                       if (value == 'logout') {
-                        FirebaseAuth.instance.signOut(); // Handle Firebase logout
+                        FirebaseAuth.instance.signOut(); // Logout
                         Navigator.pushAndRemoveUntil(
                           context,
                           MaterialPageRoute(
@@ -371,7 +379,6 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  // Build service button (this part is fine as-is)
   Widget _buildServiceButton(
       IconData icon, String text, Color color, VoidCallback onTap) {
     return GestureDetector(
@@ -396,7 +403,6 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  // Build offer card (this part is fine as-is)
   Widget _buildOfferCard(Map<String, dynamic> offer) {
     return Card(
       elevation: 4,

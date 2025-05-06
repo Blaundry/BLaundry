@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:blaundry_registlogin/welcome.dart';
+
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({super.key});
@@ -10,15 +12,14 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-
   String email = "";
   String username = "";
   String phoneNumber = "";
   String address = "";
   String password = "";
   bool _isLoading = true;
-
   bool _isPasswordVisible = false;
+
   final _auth = FirebaseAuth.instance;
   final _firestore = FirebaseFirestore.instance;
   late String userId;
@@ -44,7 +45,7 @@ class _ProfilePageState extends State<ProfilePage> {
           username = userDoc.get('name') ?? "";
           phoneNumber = userDoc.get('phone') ?? "";
           address = userDoc.get('address') ?? "";
-          password = userDoc.get('password') ?? ""; // ✅ Fetch password
+          password = userDoc.get('password') ?? "";
           _isLoading = false;
         });
       }
@@ -62,7 +63,7 @@ class _ProfilePageState extends State<ProfilePage> {
         if (field == "name") username = value;
         if (field == "phone") phoneNumber = value;
         if (field == "address") address = value;
-        if (field == "password") password = value; // ✅ Update stored password
+        if (field == "password") password = value;
       });
       _showSnackbar("$field updated successfully", Colors.green);
     } catch (e) {
@@ -105,7 +106,7 @@ class _ProfilePageState extends State<ProfilePage> {
   void _editPassword() {
     final newController = TextEditingController();
     final confirmController = TextEditingController();
-    final oldController = TextEditingController(); // Needed for re-authentication
+    final oldController = TextEditingController();
 
     showDialog(
       context: context,
@@ -148,7 +149,11 @@ class _ProfilePageState extends State<ProfilePage> {
             child: const Text("Cancel", style: TextStyle(color: Colors.blue)),
           ),
           ElevatedButton(
-            onPressed: () => _updatePassword(oldController.text, newController.text, confirmController.text),
+            onPressed: () => _updatePassword(
+              oldController.text,
+              newController.text,
+              confirmController.text,
+            ),
             style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
             child: const Text("Update"),
           ),
@@ -157,7 +162,8 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-  Future<void> _updatePassword(String oldPassword, String newPassword, String confirmPassword) async {
+  Future<void> _updatePassword(
+      String oldPassword, String newPassword, String confirmPassword) async {
     if (newPassword != confirmPassword) {
       _showSnackbar("Passwords do not match", Colors.red);
       return;
@@ -168,20 +174,18 @@ class _ProfilePageState extends State<ProfilePage> {
     }
 
     try {
-      User? user = FirebaseAuth.instance.currentUser;
+      User? user = _auth.currentUser;
       if (user == null) {
         _showSnackbar("User not found", Colors.red);
         return;
       }
 
-      // **Re-authenticate user**
-      final credential = EmailAuthProvider.credential(email: user.email!, password: oldPassword);
+      final credential = EmailAuthProvider.credential(
+        email: user.email!,
+        password: oldPassword,
+      );
       await user.reauthenticateWithCredential(credential);
-
-      // **Update password in Firebase Authentication**
       await user.updatePassword(newPassword);
-
-      // **Store new password in Firestore (as requested)**
       await _updateUserData("password", newPassword);
 
       _showSnackbar("Password updated successfully", Colors.green);
@@ -189,6 +193,64 @@ class _ProfilePageState extends State<ProfilePage> {
     } catch (e) {
       _showSnackbar("Failed to update password: ${e.toString()}", Colors.red);
     }
+  }
+
+  Future<void> _deleteUserDocument() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      final uid = user?.uid;
+
+      if (uid == null) {
+        _showSnackbar("No user is currently signed in", Colors.red);
+        return;
+      }
+
+      await _firestore.collection('users').doc(userId).delete();
+      await user!.delete();
+      _showSnackbar("Profile data deleted successfully", Colors.green);
+
+      setState(() {
+        username = "";
+        phoneNumber = "";
+        address = "";
+        password = "";
+      });
+
+      // Navigate to WelcomePage and clear navigation stack
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(builder: (context) => const WelcomePage()),
+        (route) => false,
+      );
+    } catch (e) {
+      _showSnackbar("Failed to delete profile data", Colors.red);
+    }
+  }
+
+  void _confirmDeleteAccount() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Delete Profile Data"),
+        content: const Text(
+          "Are you sure you want to delete your profile data from the database?",
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel", style: TextStyle(color: Colors.blue)),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              Navigator.pop(context);
+              await _deleteUserDocument();
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            child: const Text("Delete"),
+          ),
+        ],
+      ),
+    );
   }
 
   @override
@@ -209,11 +271,23 @@ class _ProfilePageState extends State<ProfilePage> {
                   _buildProfileTile("Email", email, "email"),
                   _buildProfileTile("Phone Number", phoneNumber, "phone"),
                   _buildProfileTile("Address", address, "address"),
-                  
-                  // Password Tile
                   _buildMaskedTile("Password", password, _isPasswordVisible, () {
                     setState(() => _isPasswordVisible = !_isPasswordVisible);
                   }),
+                  const SizedBox(height: 20),
+                  ElevatedButton.icon(
+                    onPressed: _confirmDeleteAccount,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 12,
+                      ),
+                    ),
+                    icon: const Icon(Icons.delete),
+                    label: const Text("Delete Profile Data"),
+                  ),
                 ],
               ),
             ),
@@ -229,13 +303,16 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
-
-  Widget _buildMaskedTile(String title, String value, bool isVisible, VoidCallback toggleVisibility) {
+  Widget _buildMaskedTile(
+      String title, String value, bool isVisible, VoidCallback toggleVisibility) {
     return ListTile(
       title: Text(title),
       subtitle: Text(isVisible ? value : "********"),
       trailing: IconButton(
-        icon: Icon(isVisible ? Icons.visibility_off : Icons.visibility, color: Colors.grey),
+        icon: Icon(
+          isVisible ? Icons.visibility_off : Icons.visibility,
+          color: Colors.grey,
+        ),
         onPressed: toggleVisibility,
       ),
       onTap: () => title == "Password" ? _editPassword() : null,

@@ -70,11 +70,13 @@ class MyOrderPage extends StatelessWidget {
                   return ListView.builder(
                     itemCount: activeOrders.length,
                     itemBuilder: (context, index) {
-                      final data =
-                          activeOrders[index].data() as Map<String, dynamic>;
+                      final doc = activeOrders[index];
+                      final data = doc.data() as Map<String, dynamic>;
+                      final orderId = doc.id;
 
                       return _buildOrderCard(
                         context,
+                        orderId: activeOrders[index].id, // this is your actual document ID (orderId)
                         service: data['serviceType'] ?? 'Laundry',
                         items: data['quantity'] ?? 0,
                         status: data['status'] ?? 'Unknown',
@@ -82,10 +84,11 @@ class MyOrderPage extends StatelessWidget {
                         onTap: () => Navigator.push(
                           context,
                           MaterialPageRoute(
-                              builder: (context) => const PaymentPage()),
+                            builder: (context) => PaymentPage(orderId: orderId), // passing the doc ID
+                          ),
                         ),
                       );
-                    },
+                    }
                   );
                 },
               ),
@@ -129,6 +132,7 @@ class MyOrderPage extends StatelessWidget {
 
                       return _buildOrderCard(
                         context,
+                        orderId: historyOrders[index].id,
                         service: data['serviceType'] ?? 'Laundry',
                         items: data['quantity'] ?? 0,
                         status: data['status'] ?? 'Completed',
@@ -167,6 +171,7 @@ class MyOrderPage extends StatelessWidget {
 
   Widget _buildOrderCard(
     BuildContext context, {
+    required String orderId,
     required String service,
     required int items,
     required String status,
@@ -199,6 +204,11 @@ class MyOrderPage extends StatelessWidget {
         statusIcon = Icons.check_circle;
         statusLabel = 'Completed';
         break;
+      case 'Payment':
+        statusColor = Colors.red;
+        statusIcon = Icons.payment;
+        statusLabel = 'Payment Required';
+        break;
       default:
         statusColor = Colors.grey;
         statusIcon = Icons.help_outline;
@@ -214,7 +224,20 @@ class MyOrderPage extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 16),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: onTap,
+        onTap: () {
+          // If the status is "Payment", navigate to PaymentPage
+          if (status == 'Payment') {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                 builder: (context) => PaymentPage(orderId: orderId),
+              ),
+            );
+          } else {
+            // You can add other navigation logic here for other statuses if needed
+            onTap?.call();  // If onTap is provided, call it (useful for other statuses)
+          }
+        },
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Row(
