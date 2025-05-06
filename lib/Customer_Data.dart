@@ -197,6 +197,7 @@ class _CustomerDataPageState extends State<CustomerDataPage> {
                 TextField(
                   controller: emailController,
                   decoration: const InputDecoration(labelText: "Email"),
+                  readOnly: true,
                 ),
                 const SizedBox(height: 8),
                 TextField(
@@ -213,6 +214,7 @@ class _CustomerDataPageState extends State<CustomerDataPage> {
                 TextField(
                   controller: passwordController,
                   decoration: const InputDecoration(labelText: "Password"),
+                  readOnly: true,
                 ),
               ],
             ),

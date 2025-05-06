@@ -60,6 +60,7 @@ class _RegistPageState extends State<RegistPage> {
         'name': name,
         'phone': phone,
         'address': address,
+        'password': password,
         'role': 'user',
         'createdAt': Timestamp.now(),
       });
