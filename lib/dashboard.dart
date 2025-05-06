@@ -5,7 +5,10 @@ import 'package:blaundry_registlogin/washiron.dart';
 import 'package:blaundry_registlogin/myorder.dart';
 import 'package:blaundry_registlogin/button_navbar_user.dart';
 import 'package:blaundry_registlogin/profile.dart';
-import 'package:blaundry_registlogin/chatBot.dart'; 
+import 'package:blaundry_registlogin/chatBot.dart';
+import 'package:blaundry_registlogin/login_customer.dart'; 
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -16,7 +19,30 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
   int _selectedIndex = 0;
-  String username = "Khidir Julian";
+  String _userName = 'User';
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserName();
+  }
+
+  Future<void> _fetchUserName() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final userDoc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      final name = userDoc.data()?['name'];
+      if (name != null) {
+        setState(() {
+          _userName = name;
+        });
+      }
+    }
+  }
+
   final PageController _pageController = PageController(viewportFraction: 0.8);
 
   final List<Map<String, dynamic>> offers = [
@@ -92,36 +118,57 @@ class _DashboardPageState extends State<DashboardPage> {
                       fontSize: 16,
                       color: Colors.white,
                       fontWeight: FontWeight.bold)),
-              GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const ProfilePage()),
-                  );
-                },
-                child: CircleAvatar(
-                  radius: 16,
-                  backgroundColor: Colors.white,
-                  child: Text(
-                    username[0],
-                    style: const TextStyle(
-                      color: Color.fromARGB(255, 33, 149, 243),
-                      fontWeight: FontWeight.bold,
+              Row(
+                children: [
+                  PopupMenuButton<String>(
+                    onSelected: (value) {
+                      if (value == 'logout') {
+                        FirebaseAuth.instance.signOut(); // Handle Firebase logout
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => const LoginCustomerPage()),
+                          (Route<dynamic> route) => false,
+                        );
+                      }
+                    },
+                    icon: const Icon(Icons.more_vert, color: Colors.white),
+                    itemBuilder: (BuildContext context) => [
+                      const PopupMenuItem<String>(
+                        value: 'logout',
+                        child: Text('Logout'),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(width: 10),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => const ProfilePage()),
+                      );
+                    },
+                    child: CircleAvatar(
+                      radius: 16,
+                      backgroundColor: Colors.white,
+                      child: Text(
+                        _userName[0],
+                        style: const TextStyle(
+                          color: Color.fromARGB(255, 33, 149, 243),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
                   ),
-                ),
+                ],
               ),
             ],
           ),
         ),
         body: Stack(
           children: [
-            // Blue Background (matches app bar)
-            Container(
-              color: Color(0xFF05588A),
-            ),
-
-            // Main Scrollable Content
+            Container(color: const Color(0xFF05588A)),
             SingleChildScrollView(
               child: Column(
                 children: [
@@ -148,7 +195,7 @@ class _DashboardPageState extends State<DashboardPage> {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                'Hello, $username!',
+                                'Hello, $_userName!',
                                 style: const TextStyle(
                                   fontSize: 28,
                                   fontWeight: FontWeight.bold,
@@ -189,7 +236,9 @@ class _DashboardPageState extends State<DashboardPage> {
                                 Colors.purple,
                                 () => Navigator.push(
                                   context,
-                                  MaterialPageRoute(builder: (context) => const RegularWashPage()),
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const RegularWashPage()),
                                 ),
                               ),
                               _buildServiceButton(
@@ -198,7 +247,9 @@ class _DashboardPageState extends State<DashboardPage> {
                                 Colors.orange,
                                 () => Navigator.push(
                                   context,
-                                  MaterialPageRoute(builder: (context) => const WashIronPage()),
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const WashIronPage()),
                                 ),
                               ),
                               _buildServiceButton(
@@ -207,7 +258,9 @@ class _DashboardPageState extends State<DashboardPage> {
                                 Colors.blue,
                                 () => Navigator.push(
                                   context,
-                                  MaterialPageRoute(builder: (context) => const ShoeWashPage()),
+                                  MaterialPageRoute(
+                                      builder: (context) =>
+                                          const ShoeWashPage()),
                                 ),
                               ),
                             ],
@@ -226,26 +279,25 @@ class _DashboardPageState extends State<DashboardPage> {
                     ),
                     child: Column(
                       children: [
-                        // Estimated Time
                         Padding(
                           padding: const EdgeInsets.symmetric(
                               horizontal: 30, vertical: 30),
                           child: Container(
                             padding: const EdgeInsets.all(20),
                             decoration: BoxDecoration(
-                              color: Color(0xFF29A3FF),
+                              color: const Color(0xFF29A3FF),
                               borderRadius: BorderRadius.circular(20),
                             ),
                             child: Column(
-                              children: [
-                                const Text(
+                              children: const [
+                                Text(
                                   "Estimated time remaining:",
                                   style: TextStyle(
                                     fontSize: 16,
                                     color: Colors.white,
                                   ),
                                 ),
-                                const SizedBox(height: 8),
+                                SizedBox(height: 8),
                                 Text(
                                   "1 days 15 hours",
                                   style: TextStyle(
@@ -258,14 +310,13 @@ class _DashboardPageState extends State<DashboardPage> {
                             ),
                           ),
                         ),
-
-                        // Large Scrollable Gap
                         const SizedBox(height: 100),
                         Container(
                           padding: const EdgeInsets.all(20),
                           decoration: const BoxDecoration(
                             color: Colors.white,
-                            borderRadius: BorderRadius.all(Radius.circular(30)),
+                            borderRadius:
+                                BorderRadius.all(Radius.circular(30)),
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.center,
@@ -290,7 +341,6 @@ class _DashboardPageState extends State<DashboardPage> {
                                   },
                                 ),
                               ),
-                              const SizedBox(height: 10),
                               const SizedBox(height: 30),
                             ],
                           ),
@@ -321,7 +371,9 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
-  Widget _buildServiceButton(IconData icon, String text, Color color, VoidCallback onTap) {
+  // Build service button (this part is fine as-is)
+  Widget _buildServiceButton(
+      IconData icon, String text, Color color, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Column(
@@ -344,6 +396,7 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
+  // Build offer card (this part is fine as-is)
   Widget _buildOfferCard(Map<String, dynamic> offer) {
     return Card(
       elevation: 4,

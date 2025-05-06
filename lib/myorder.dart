@@ -11,10 +11,9 @@ class MyOrderPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userId = FirebaseAuth
-        .instance.currentUser?.uid;
-
-    print("User ID: $userId");
+    final user = FirebaseAuth.instance.currentUser;
+    final userId = user?.uid;
+    final username = user?.displayName ?? "Guest"; // Fallback to "Guest" if no displayName is set
 
     if (userId == null) {
       return const Center(child: Text("User is not logged in"));
@@ -49,8 +48,7 @@ class MyOrderPage extends StatelessWidget {
               child: StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
                     .collection('orders')
-                    .where('userId',
-                        isEqualTo: userId)
+                    .where('userId', isEqualTo: userId)
                     .where('status', isNotEqualTo: 'Finished')
                     .orderBy('createdAt', descending: true)
                     .snapshots(),
@@ -104,8 +102,7 @@ class MyOrderPage extends StatelessWidget {
               child: StreamBuilder<QuerySnapshot>(
                 stream: FirebaseFirestore.instance
                     .collection('orders')
-                    .where('userId',
-                        isEqualTo: userId) // Filter berdasarkan userId
+                    .where('userId', isEqualTo: userId) // Filter berdasarkan userId
                     .where('status', isEqualTo: 'Finished')
                     .orderBy('createdAt', descending: true)
                     .snapshots(),
@@ -151,12 +148,16 @@ class MyOrderPage extends StatelessWidget {
           if (index == 0) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const DashboardPage()),
+              MaterialPageRoute(
+                builder: (context) => const DashboardPage(), // No username passed here
+              ),
             );
           } else if (index == 2) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const ProfilePage()),
+              MaterialPageRoute(
+                builder: (context) => const ProfilePage(),
+              ),
             );
           }
         },
@@ -169,7 +170,8 @@ class MyOrderPage extends StatelessWidget {
     required String service,
     required int items,
     required String status,
-    VoidCallback? onTap, required MaterialColor statusColor,
+    VoidCallback? onTap,
+    required MaterialColor statusColor,
   }) {
     // Tentukan warna dan ikon berdasarkan status
     Color statusColor;
