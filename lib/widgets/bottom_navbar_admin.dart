@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:blaundry_registlogin/Customer_Data.dart';
-import 'package:blaundry_registlogin/Customer_order.dart'; // Import CustomerOrderPage
+import 'package:blaundry_registlogin/pages/Customer_Data.dart';
+import 'package:blaundry_registlogin/pages/Customer_order.dart';
 
 class BottomNavBar extends StatelessWidget {
   final int selectedIndex;

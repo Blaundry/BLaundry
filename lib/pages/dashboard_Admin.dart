@@ -3,12 +3,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'package:blaundry_registlogin/regularwash.dart';
-import 'package:blaundry_registlogin/shoewash.dart';
-import 'package:blaundry_registlogin/washiron.dart';
-import 'package:blaundry_registlogin/login_customer.dart';
-import 'package:blaundry_registlogin/bottom_navbar_admin.dart';
-import 'package:blaundry_registlogin/Customer_Data.dart';
+import 'package:blaundry_registlogin/pages/regularwash.dart';
+import 'package:blaundry_registlogin/pages/shoewash.dart';
+import 'package:blaundry_registlogin/pages/washiron.dart';
+import 'package:blaundry_registlogin/pages/login_customer.dart';
+import 'package:blaundry_registlogin/widgets/bottom_navbar_admin.dart';
+import 'package:blaundry_registlogin/pages/Customer_Data.dart';
 
 class DashboardAdminPage extends StatefulWidget {
   const DashboardAdminPage({super.key});

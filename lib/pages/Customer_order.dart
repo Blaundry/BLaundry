@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:blaundry_registlogin/bottom_navbar_admin.dart';
-import 'package:blaundry_registlogin/dashboard_Admin.dart';
+import 'package:blaundry_registlogin/widgets/bottom_navbar_admin.dart';
+import 'package:blaundry_registlogin/pages/dashboard_Admin.dart';
 
 class CustomerOrderPage extends StatefulWidget {
   const CustomerOrderPage({super.key});
@@ -28,7 +28,7 @@ class _CustomerOrderPageState extends State<CustomerOrderPage> {
     final snapshot = await FirebaseFirestore.instance.collection('users').get();
     final userMap = <String, Map<String, dynamic>>{};
     for (var doc in snapshot.docs) {
-      userMap[doc.id] = doc.data() as Map<String, dynamic>;
+      userMap[doc.id] = doc.data();
     }
     setState(() {
       _userMap = userMap;
@@ -57,7 +57,7 @@ class _CustomerOrderPageState extends State<CustomerOrderPage> {
 
   @override
   Widget build(BuildContext context) {
-    final Stream<QuerySnapshot> _orderStream =
+    final Stream<QuerySnapshot> orderStream =
         FirebaseFirestore.instance.collection('orders').snapshots();
 
     return Scaffold(
@@ -140,7 +140,7 @@ class _CustomerOrderPageState extends State<CustomerOrderPage> {
           ),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: _orderStream,
+              stream: orderStream,
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
                   return const Center(child: Text('Error loading orders'));

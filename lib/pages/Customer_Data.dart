@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:blaundry_registlogin/bottom_navbar_admin.dart';
-import 'package:blaundry_registlogin/dashboard_admin.dart';
+import 'package:blaundry_registlogin/widgets/bottom_navbar_admin.dart';
+import 'package:blaundry_registlogin/pages/dashboard_admin.dart';
 
 class CustomerDataPage extends StatefulWidget {
   const CustomerDataPage({super.key});
@@ -43,7 +43,7 @@ class _CustomerDataPageState extends State<CustomerDataPage> {
 
   @override
   Widget build(BuildContext context) {
-    final Stream<QuerySnapshot> _customersStream =
+    final Stream<QuerySnapshot> customersStream =
         FirebaseFirestore.instance.collection('users').snapshots();
 
     return Scaffold(
@@ -99,7 +99,7 @@ class _CustomerDataPageState extends State<CustomerDataPage> {
           ),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: _customersStream,
+              stream: customersStream,
               builder: (context, snapshot) {
                 if (!snapshot.hasData || snapshot.data == null) {
                   return const Center(child: Text('No customers found'));

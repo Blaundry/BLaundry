@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:blaundry_registlogin/welcome.dart';
+import 'package:blaundry_registlogin/pages/welcome.dart';
 
 
 class ProfilePage extends StatefulWidget {
@@ -37,15 +37,20 @@ class _ProfilePageState extends State<ProfilePage> {
     userId = user.uid;
 
     try {
-      DocumentSnapshot userDoc =
-          await _firestore.collection('users').doc(userId).get();
+      DocumentSnapshot userDoc = await _firestore.collection('users').doc(userId).get();
       if (userDoc.exists) {
+        final data = userDoc.data() as Map<String, dynamic>;
+
         setState(() {
-          email = user.email!;
-          username = userDoc.get('name') ?? "";
-          phoneNumber = userDoc.get('phone') ?? "";
-          address = userDoc.get('address') ?? "";
-          password = userDoc.get('password') ?? "";
+          email = user.email ?? ""; // from Firebase Auth
+          username = data['name'] ?? "";
+          phoneNumber = data['phone'] ?? "";
+          address = data['address'] ?? "";
+          password = data['password'] ?? "";
+          _isLoading = false;
+        });
+      } else {
+        setState(() {
           _isLoading = false;
         });
       }
@@ -55,8 +60,19 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+
   Future<void> _updateUserData(String field, String value) async {
     try {
+      User? user = _auth.currentUser;
+      if (user == null) {
+        _showSnackbar("User not authenticated", Colors.red);
+        return;
+      }
+
+      // Handle sensitive auth updates
+      if (field == "email") {
+        await user.updateEmail(value);
+      }
       await _firestore.collection('users').doc(userId).update({field: value});
       setState(() {
         if (field == "email") email = value;
@@ -73,17 +89,35 @@ class _ProfilePageState extends State<ProfilePage> {
 
   void _editField(String title, String currentValue, String fieldKey) {
     final controller = TextEditingController(text: currentValue);
+    final passwordController = TextEditingController();
+    bool isEmailField = fieldKey == "email";
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text("Edit $title"),
-        content: TextField(
-          controller: controller,
-          decoration: InputDecoration(
-            border: const OutlineInputBorder(),
-            hintText: "Enter new $title",
-          ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: controller,
+              decoration: InputDecoration(
+                labelText: "New $title",
+                border: const OutlineInputBorder(),
+              ),
+            ),
+            if (isEmailField) ...[
+              const SizedBox(height: 12),
+              TextField(
+                controller: passwordController,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  labelText: "Current Password",
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ],
+          ],
         ),
         actions: [
           TextButton(
@@ -91,16 +125,62 @@ class _ProfilePageState extends State<ProfilePage> {
             child: const Text("Cancel", style: TextStyle(color: Colors.blue)),
           ),
           ElevatedButton(
-            onPressed: () {
-              _updateUserData(fieldKey, controller.text);
-              Navigator.pop(context);
-            },
+            onPressed: () => _updateField(
+              fieldKey,
+              controller.text.trim(),
+              passwordController.text,
+            ),
             style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
-            child: const Text("Save"),
+            child: const Text("Update"),
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _updateField(String fieldKey, String newValue, String currentPassword) async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      _showSnackbar("User not found", Colors.red);
+      return;
+    }
+
+    if (fieldKey == "email") {
+      if (newValue == email) {
+        _showSnackbar("New email is the same as current", Colors.orange);
+        return;
+      }
+
+      try {
+        final cred = EmailAuthProvider.credential(
+          email: user.email!,
+          password: currentPassword,
+        );
+        await user.reauthenticateWithCredential(cred);
+
+        final methods = await _auth.fetchSignInMethodsForEmail(newValue);
+        if (methods.isNotEmpty) {
+          _showSnackbar("Email is already in use by another account", Colors.red);
+          return;
+        }
+
+        await user.verifyBeforeUpdateEmail(newValue);
+        await _firestore.collection('users').doc(user.uid).update({'email': newValue});
+        setState(() => email = newValue);
+
+        _showSnackbar("Email updated, please verify the new address", Colors.green);
+        Navigator.pop(context);
+      } catch (e) {
+        _showSnackbar("Error updating email: ${e.toString()}", Colors.red);
+      }
+    } else {
+      try {
+        await _updateUserData(fieldKey, newValue);
+        Navigator.pop(context);
+      } catch (e) {
+        _showSnackbar("Failed to update $fieldKey: ${e.toString()}", Colors.red);
+      }
+    }
   }
 
   void _editPassword() {
