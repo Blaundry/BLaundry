@@ -43,7 +43,7 @@ class _CustomerDataPageState extends State<CustomerDataPage> {
 
   @override
   Widget build(BuildContext context) {
-    final Stream<QuerySnapshot> _customersStream =
+    final Stream<QuerySnapshot> customersStream =
         FirebaseFirestore.instance.collection('users').snapshots();
 
     return Scaffold(
@@ -99,7 +99,7 @@ class _CustomerDataPageState extends State<CustomerDataPage> {
           ),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: _customersStream,
+              stream: customersStream,
               builder: (context, snapshot) {
                 if (!snapshot.hasData || snapshot.data == null) {
                   return const Center(child: Text('No customers found'));

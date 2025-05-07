@@ -57,7 +57,7 @@ class _CustomerOrderPageState extends State<CustomerOrderPage> {
 
   @override
   Widget build(BuildContext context) {
-    final Stream<QuerySnapshot> _orderStream =
+    final Stream<QuerySnapshot> orderStream =
         FirebaseFirestore.instance.collection('orders').snapshots();
 
     return Scaffold(
@@ -140,7 +140,7 @@ class _CustomerOrderPageState extends State<CustomerOrderPage> {
           ),
           Expanded(
             child: StreamBuilder<QuerySnapshot>(
-              stream: _orderStream,
+              stream: orderStream,
               builder: (context, snapshot) {
                 if (snapshot.hasError) {
                   return const Center(child: Text('Error loading orders'));
