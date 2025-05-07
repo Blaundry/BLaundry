@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:blaundry_registlogin/bottom_navbar_admin.dart';
-import 'package:blaundry_registlogin/dashboard_admin.dart';
+import 'package:blaundry_registlogin/widgets/bottom_navbar_admin.dart';
+import 'package:blaundry_registlogin/pages/dashboard_admin.dart';
 
 class CustomerDataPage extends StatefulWidget {
   const CustomerDataPage({super.key});

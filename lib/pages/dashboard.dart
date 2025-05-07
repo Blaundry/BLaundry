@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:blaundry_registlogin/regularwash.dart';
-import 'package:blaundry_registlogin/shoewash.dart';
-import 'package:blaundry_registlogin/washiron.dart';
-import 'package:blaundry_registlogin/myorder.dart';
-import 'package:blaundry_registlogin/button_navbar_user.dart';
-import 'package:blaundry_registlogin/profile.dart';
-import 'package:blaundry_registlogin/chatBot.dart';
-import 'package:blaundry_registlogin/login_customer.dart';
+import 'package:blaundry_registlogin/pages/regularwash.dart';
+import 'package:blaundry_registlogin/pages/shoewash.dart';
+import 'package:blaundry_registlogin/pages/washiron.dart';
+import 'package:blaundry_registlogin/pages/myorder.dart';
+import 'package:blaundry_registlogin/widgets/button_navbar_user.dart';
+import 'package:blaundry_registlogin/pages/profile.dart';
+import 'package:blaundry_registlogin/services/chatBot.dart';
+import 'package:blaundry_registlogin/pages/login_customer.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 

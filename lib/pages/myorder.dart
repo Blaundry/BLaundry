@@ -1,10 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:blaundry_registlogin/payment.dart';
-import 'package:blaundry_registlogin/dashboard.dart';
-import 'package:blaundry_registlogin/profile.dart';
-import 'package:blaundry_registlogin/button_navbar_user.dart';
+import 'package:blaundry_registlogin/pages/payment.dart';
+import 'package:blaundry_registlogin/pages/dashboard.dart';
+import 'package:blaundry_registlogin/pages/profile.dart';
+import 'package:blaundry_registlogin/widgets/button_navbar_user.dart';
 
 class MyOrderPage extends StatelessWidget {
   const MyOrderPage({super.key});

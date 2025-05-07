@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'regist.dart';
 import 'dashboard.dart'; // Ensure this accepts username internally
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:blaundry_registlogin/welcome.dart'; // Your WelcomePage
+import 'package:blaundry_registlogin/pages/welcome.dart'; // Your WelcomePage
 
 class LoginCustomerPage extends StatefulWidget {
   const LoginCustomerPage({super.key});

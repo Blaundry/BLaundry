@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:blaundry_registlogin/dashboard_Admin.dart';
-import 'package:blaundry_registlogin/welcome.dart';
+import 'package:blaundry_registlogin/pages/dashboard_Admin.dart';
+import 'package:blaundry_registlogin/pages/welcome.dart';
 
 class LoginAdminPage extends StatefulWidget {
   const LoginAdminPage({super.key});
